@@ -1,42 +1,53 @@
 <template>
-  <div class="app">
-    <header class="top-nav">
-      <div class="nav-container">
-        <div class="logo">
+  <div class="app-shell" :class="{ 'is-collapsed': sidebarCollapsed }">
+    <aside class="sidebar" :aria-expanded="!sidebarCollapsed">
+      <div class="brand">
+        <span class="brand-mark">CC</span>
+        <div class="brand-text">
           <h1>{{ t('nav.companyName') }}</h1>
-          <span class="subtitle">{{ t('nav.subtitle') }}</span>
+          <span class="brand-sub">{{ t('nav.subtitle') }}</span>
         </div>
-        <nav class="nav-tabs">
-          <router-link to="/" :class="{ active: $route.path === '/' }">
-            {{ t('nav.overview') }}
-          </router-link>
-          <router-link to="/inventory" :class="{ active: $route.path === '/inventory' }">
-            {{ t('nav.inventory') }}
-          </router-link>
-          <router-link to="/orders" :class="{ active: $route.path === '/orders' }">
-            {{ t('nav.orders') }}
-          </router-link>
-          <router-link to="/spending" :class="{ active: $route.path === '/spending' }">
-            {{ t('nav.finance') }}
-          </router-link>
-          <router-link to="/demand" :class="{ active: $route.path === '/demand' }">
-            {{ t('nav.demandForecast') }}
-          </router-link>
-          <router-link to="/reports" :class="{ active: $route.path === '/reports' }">
-            Reports
-          </router-link>
-        </nav>
+      </div>
+
+      <nav class="sidebar-nav">
+        <router-link
+          v-for="item in navItems"
+          :key="item.to"
+          :to="item.to"
+          :class="{ active: $route.path === item.to }"
+          :title="t(item.labelKey)"
+        >
+          <span class="nav-icon" v-html="item.icon"></span>
+          <span class="nav-label">{{ t(item.labelKey) }}</span>
+        </router-link>
+      </nav>
+
+      <div class="sidebar-utils">
         <LanguageSwitcher />
         <ProfileMenu
           @show-profile-details="showProfileDetails = true"
           @show-tasks="showTasks = true"
         />
       </div>
-    </header>
-    <FilterBar />
-    <main class="main-content">
-      <router-view />
-    </main>
+
+      <button
+        class="collapse-toggle"
+        @click="toggleSidebar"
+        :aria-label="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+        :title="sidebarCollapsed ? 'Expand' : 'Collapse'"
+      >
+        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path :d="sidebarCollapsed ? 'M7 5l5 5-5 5' : 'M13 5l-5 5 5 5'" />
+        </svg>
+      </button>
+    </aside>
+
+    <div class="main-area">
+      <FilterBar />
+      <main class="main-content">
+        <router-view />
+      </main>
+    </div>
 
     <ProfileDetailsModal
       :is-open="showProfileDetails"
@@ -65,6 +76,51 @@ import ProfileDetailsModal from './components/ProfileDetailsModal.vue'
 import TasksModal from './components/TasksModal.vue'
 import LanguageSwitcher from './components/LanguageSwitcher.vue'
 
+const SIDEBAR_KEY = 'app-sidebar-collapsed'
+
+const NAV_ITEMS = [
+  {
+    to: '/',
+    labelKey: 'nav.overview',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>'
+  },
+  {
+    to: '/inventory',
+    labelKey: 'nav.inventory',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l7-3 7 3-7 3-7-3z"/><path d="M3 6v8l7 3 7-3V6"/><path d="M10 9v8"/></svg>'
+  },
+  {
+    to: '/orders',
+    labelKey: 'nav.orders',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8l1 4H5l1-4z"/><path d="M5 8v8h10V8"/><path d="M9 11h2"/></svg>'
+  },
+  {
+    to: '/spending',
+    labelKey: 'nav.finance',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v14"/><path d="M13.5 6.5c-.5-1-1.7-1.5-3.5-1.5-2 0-3 1-3 2.3 0 3.4 7 1.8 7 5 0 1.6-1.5 2.7-4 2.7-2 0-3.5-.7-4-2"/></svg>'
+  },
+  {
+    to: '/demand',
+    labelKey: 'nav.demandForecast',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14l5-5 3 3 6-6"/><path d="M14 6h3v3"/></svg>'
+  },
+  {
+    to: '/restocking',
+    labelKey: 'nav.restocking',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10a7 7 0 0 1 12-5l2 2"/><path d="M17 5v4h-4"/><path d="M17 10a7 7 0 0 1-12 5l-2-2"/><path d="M3 15v-4h4"/></svg>'
+  },
+  {
+    to: '/backlog',
+    labelKey: 'nav.backlog',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12"/><path d="M4 10h12"/><path d="M4 15h8"/><circle cx="16" cy="15" r="2"/></svg>'
+  },
+  {
+    to: '/reports',
+    labelKey: 'nav.reports',
+    icon: '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V8"/><path d="M9 17V4"/><path d="M14 17v-7"/><path d="M3 17h14"/></svg>'
+  }
+]
+
 export default {
   name: 'App',
   components: {
@@ -81,7 +137,12 @@ export default {
     const showTasks = ref(false)
     const apiTasks = ref([])
 
-    // Merge mock tasks from currentUser with API tasks
+    const sidebarCollapsed = ref(localStorage.getItem(SIDEBAR_KEY) === '1')
+    const toggleSidebar = () => {
+      sidebarCollapsed.value = !sidebarCollapsed.value
+      localStorage.setItem(SIDEBAR_KEY, sidebarCollapsed.value ? '1' : '0')
+    }
+
     const tasks = computed(() => {
       return [...currentUser.value.tasks, ...apiTasks.value]
     })
@@ -97,7 +158,6 @@ export default {
     const addTask = async (taskData) => {
       try {
         const newTask = await api.createTask(taskData)
-        // Add new task to the beginning of the array
         apiTasks.value.unshift(newTask)
       } catch (err) {
         console.error('Failed to add task:', err)
@@ -106,17 +166,11 @@ export default {
 
     const deleteTask = async (taskId) => {
       try {
-        // Check if it's a mock task (from currentUser)
         const isMockTask = currentUser.value.tasks.some(t => t.id === taskId)
-
         if (isMockTask) {
-          // Remove from mock tasks
           const index = currentUser.value.tasks.findIndex(t => t.id === taskId)
-          if (index !== -1) {
-            currentUser.value.tasks.splice(index, 1)
-          }
+          if (index !== -1) currentUser.value.tasks.splice(index, 1)
         } else {
-          // Remove from API tasks
           await api.deleteTask(taskId)
           apiTasks.value = apiTasks.value.filter(t => t.id !== taskId)
         }
@@ -127,19 +181,13 @@ export default {
 
     const toggleTask = async (taskId) => {
       try {
-        // Check if it's a mock task (from currentUser)
         const mockTask = currentUser.value.tasks.find(t => t.id === taskId)
-
         if (mockTask) {
-          // Toggle mock task status
           mockTask.status = mockTask.status === 'pending' ? 'completed' : 'pending'
         } else {
-          // Toggle API task
           const updatedTask = await api.toggleTask(taskId)
           const index = apiTasks.value.findIndex(t => t.id === taskId)
-          if (index !== -1) {
-            apiTasks.value[index] = updatedTask
-          }
+          if (index !== -1) apiTasks.value[index] = updatedTask
         }
       } catch (err) {
         console.error('Failed to toggle task:', err)
@@ -150,6 +198,9 @@ export default {
 
     return {
       t,
+      navItems: NAV_ITEMS,
+      sidebarCollapsed,
+      toggleSidebar,
       showProfileDetails,
       showTasks,
       tasks,
@@ -176,103 +227,228 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-.app {
-  display: flex;
-  flex-direction: column;
+.app-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
   min-height: 100vh;
+  transition: grid-template-columns 0.2s ease;
 }
 
-.top-nav {
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+.app-shell.is-collapsed {
+  grid-template-columns: 72px 1fr;
+}
+
+/* ----- Sidebar ----- */
+
+.sidebar {
   position: sticky;
   top: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  padding: 1rem 0.75rem;
+  gap: 0.5rem;
   z-index: 100;
 }
 
-.nav-container {
-  max-width: 1600px;
-  margin: 0 auto;
+.brand {
   display: flex;
   align-items: center;
-  padding: 0 2rem;
-  height: 70px;
-}
-
-.nav-container > .nav-tabs {
-  margin-left: auto;
-  margin-right: 1rem;
-}
-
-.nav-container > .language-switcher {
-  margin-right: 1rem;
-}
-
-.logo {
-  display: flex;
-  align-items: baseline;
   gap: 0.75rem;
+  padding: 0.5rem 0.625rem 0.875rem;
+  border-bottom: 1px solid #f1f5f9;
+  min-height: 56px;
+  overflow: hidden;
 }
 
-.logo h1 {
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.025em;
-}
-
-.subtitle {
+.brand-mark {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  color: #ffffff;
   font-size: 0.813rem;
-  color: #64748b;
-  font-weight: 400;
-  padding-left: 0.75rem;
-  border-left: 1px solid #e2e8f0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: grid;
+  place-items: center;
 }
 
-.nav-tabs {
+.brand-text {
   display: flex;
-  gap: 0.25rem;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
 }
 
-.nav-tabs a {
-  padding: 0.625rem 1.25rem;
+.brand-text h1 {
+  font-size: 0.938rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand-sub {
+  font-size: 0.688rem;
   color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-shell.is-collapsed .brand-text {
+  display: none;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 0.5rem;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.625rem;
+  color: #475569;
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.938rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  transition: background 0.15s ease, color 0.15s ease;
   position: relative;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.nav-tabs a:hover {
-  color: #0f172a;
+.sidebar-nav a:hover {
   background: #f1f5f9;
+  color: #0f172a;
 }
 
-.nav-tabs a.active {
-  color: #2563eb;
+.sidebar-nav a.active {
   background: #eff6ff;
+  color: #2563eb;
 }
 
-.nav-tabs a.active::after {
+.sidebar-nav a.active::before {
   content: '';
   position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
+  left: -0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 18px;
+  border-radius: 0 3px 3px 0;
   background: #2563eb;
+}
+
+.nav-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+}
+
+.app-shell.is-collapsed .nav-label,
+.app-shell.is-collapsed .brand-sub {
+  display: none;
+}
+
+.app-shell.is-collapsed .sidebar-nav a {
+  justify-content: center;
+  padding: 0.625rem;
+}
+
+.sidebar-utils {
+  margin-top: auto;
+  padding: 0.75rem 0.25rem 0.25rem;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app-shell.is-collapsed .sidebar-utils {
+  align-items: center;
+}
+
+.collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0.25rem 0 0 auto;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 6px;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.collapse-toggle:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.app-shell.is-collapsed .collapse-toggle {
+  margin: 0.25rem auto 0;
+}
+
+/* ----- Main area ----- */
+
+.main-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .main-content {
   flex: 1;
-  max-width: 1600px;
+  max-width: 1500px;
   width: 100%;
   margin: 0 auto;
   padding: 1.5rem 2rem;
 }
+
+/* ----- Responsive ----- */
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 72px 1fr;
+  }
+  .app-shell .brand-text,
+  .app-shell .nav-label {
+    display: none;
+  }
+  .app-shell .sidebar-nav a {
+    justify-content: center;
+    padding: 0.625rem;
+  }
+  .app-shell .sidebar-utils {
+    align-items: center;
+  }
+  .app-shell .collapse-toggle {
+    display: none;
+  }
+}
+
+/* ----- Shared page primitives (used by views) ----- */
 
 .page-header {
   margin-bottom: 1.5rem;
@@ -293,7 +469,7 @@ body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.25rem;
   margin-bottom: 1.5rem;
 }
@@ -301,52 +477,42 @@ body {
 .stat-card {
   background: white;
   padding: 1.25rem;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .stat-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
 }
 
 .stat-label {
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.06em;
   margin-bottom: 0.625rem;
 }
 
 .stat-value {
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #0f172a;
   letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
 }
 
-.stat-card.warning .stat-value {
-  color: #ea580c;
-}
-
-.stat-card.success .stat-value {
-  color: #059669;
-}
-
-.stat-card.danger .stat-value {
-  color: #dc2626;
-}
-
-.stat-card.info .stat-value {
-  color: #2563eb;
-}
+.stat-card.warning .stat-value { color: #ea580c; }
+.stat-card.success .stat-value { color: #059669; }
+.stat-card.danger  .stat-value { color: #dc2626; }
+.stat-card.info    .stat-value { color: #2563eb; }
 
 .card {
   background: white;
-  border-radius: 10px;
-  padding: 1.25rem;
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 1rem;
   border: 1px solid #e2e8f0;
   margin-bottom: 1.25rem;
 }
@@ -357,14 +523,15 @@ body {
   align-items: center;
   margin-bottom: 1rem;
   padding-bottom: 0.875rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 1rem;
 }
 
 .card-title {
-  font-size: 1.125rem;
+  font-size: 1.063rem;
   font-weight: 700;
   color: #0f172a;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.015em;
 }
 
 .table-container {
@@ -409,63 +576,24 @@ tbody tr:hover {
 
 .badge {
   display: inline-block;
-  padding: 0.313rem 0.75rem;
+  padding: 0.25rem 0.625rem;
   border-radius: 6px;
-  font-size: 0.75rem;
+  font-size: 0.688rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.025em;
+  letter-spacing: 0.04em;
 }
 
-.badge.success {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge.warning {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.badge.danger {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.info {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.badge.increasing {
-  background: #d1fae5;
-  color: #065f46;
-}
-
-.badge.decreasing {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.stable {
-  background: #e0e7ff;
-  color: #3730a3;
-}
-
-.badge.high {
-  background: #fecaca;
-  color: #991b1b;
-}
-
-.badge.medium {
-  background: #fed7aa;
-  color: #92400e;
-}
-
-.badge.low {
-  background: #dbeafe;
-  color: #1e40af;
-}
+.badge.success    { background: #d1fae5; color: #065f46; }
+.badge.warning    { background: #fed7aa; color: #92400e; }
+.badge.danger     { background: #fecaca; color: #991b1b; }
+.badge.info       { background: #dbeafe; color: #1e40af; }
+.badge.increasing { background: #d1fae5; color: #065f46; }
+.badge.decreasing { background: #fecaca; color: #991b1b; }
+.badge.stable     { background: #e0e7ff; color: #3730a3; }
+.badge.high       { background: #fecaca; color: #991b1b; }
+.badge.medium     { background: #fed7aa; color: #92400e; }
+.badge.low        { background: #dbeafe; color: #1e40af; }
 
 .loading {
   text-align: center;
@@ -478,9 +606,9 @@ tbody tr:hover {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #991b1b;
-  padding: 1rem;
+  padding: 0.875rem 1rem;
   border-radius: 8px;
-  margin: 1rem 0;
-  font-size: 0.938rem;
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
 }
 </style>

@@ -27,6 +27,47 @@
         </div>
       </div>
 
+      <div class="card submitted-card" v-if="restockingOrders.length > 0">
+        <div class="card-header">
+          <h3 class="card-title">
+            {{ t('restocking.submitted.title') }}
+            <span class="muted-count">({{ restockingOrders.length }})</span>
+          </h3>
+        </div>
+        <div class="table-container">
+          <table class="orders-table submitted-table">
+            <thead>
+              <tr>
+                <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
+                <th class="col-customer">{{ t('orders.table.customer') }}</th>
+                <th class="col-items">{{ t('orders.table.items') }}</th>
+                <th class="col-status">{{ t('orders.table.status') }}</th>
+                <th class="col-date">{{ t('orders.table.orderDate') }}</th>
+                <th class="col-date">{{ t('orders.table.expectedDelivery') }}</th>
+                <th class="col-lead">{{ t('restocking.submitted.leadTime') }}</th>
+                <th class="col-value">{{ t('orders.table.totalValue') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in restockingOrders" :key="order.id">
+                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
+                <td class="col-customer">{{ order.customer }}</td>
+                <td class="col-items">{{ t('orders.itemsCount', { count: order.items.length }) }}</td>
+                <td class="col-status">
+                  <span :class="['badge', getOrderStatusClass(order.status)]">
+                    {{ t(`status.${order.status.toLowerCase()}`) }}
+                  </span>
+                </td>
+                <td class="col-date">{{ formatDate(order.order_date) }}</td>
+                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-lead">{{ leadTimeDays(order) }} {{ t('restocking.submitted.days') }}</td>
+                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
@@ -95,6 +136,7 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const restockingOrders = ref([])
 
     // Use shared filters
     const {
@@ -122,6 +164,26 @@ export default {
       } finally {
         loading.value = false
       }
+    }
+
+    const loadRestockingOrders = async () => {
+      try {
+        const fetched = await api.getRestockingOrders()
+        // Newest first
+        restockingOrders.value = fetched.sort((a, b) => new Date(b.order_date) - new Date(a.order_date))
+      } catch (err) {
+        // Submitted-orders section is non-critical; surface in console only
+        console.error('Failed to load submitted orders:', err)
+      }
+    }
+
+    const leadTimeDays = (order) => {
+      if (!order?.order_date || !order?.expected_delivery) return '—'
+      const start = new Date(order.order_date)
+      const end = new Date(order.expected_delivery)
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return '—'
+      const ms = end - start
+      return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)))
     }
 
     // Watch for filter changes and reload data
@@ -153,16 +215,21 @@ export default {
       })
     }
 
-    onMounted(loadOrders)
+    onMounted(() => {
+      loadOrders()
+      loadRestockingOrders()
+    })
 
     return {
       t,
       loading,
       error,
       orders,
+      restockingOrders,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
+      leadTimeDays,
       currencySymbol,
       translateProductName,
       translateCustomerName
@@ -201,6 +268,24 @@ export default {
 
 .col-value {
   width: 120px;
+}
+
+.col-lead {
+  width: 110px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #475569;
+}
+
+.submitted-card {
+  border-left: 3px solid #2563eb;
+}
+
+.muted-count {
+  color: #64748b;
+  font-weight: 500;
+  margin-left: 0.375rem;
+  font-size: 0.875rem;
 }
 
 /* Items details styling */

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Factory Inventory Management · Architecture</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root {
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --border: #e2e8f0;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #cbd5e1;
+    --accent: #2563eb;
+    --accent-soft: #eff6ff;
+    --vue: #41b883;
+    --py: #3776ab;
+    --warn: #ea580c;
+    --ok: #059669;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; }
+  .shell { max-width: 1180px; margin: 0 auto; padding: 40px 28px 80px; }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin-top: 6px; font-size: 15px; }
+  .pill { display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted);
+    background: #fff; border: 1px solid var(--border); border-radius: 999px; }
+  section { background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 22px 24px; margin-top: 18px; }
+  section > h2 { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px; }
+  .row { display: grid; gap: 14px; }
+  .row.cols-3 { grid-template-columns: 1fr 36px 1fr 36px 1fr; align-items: stretch; }
+  .row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .node { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .node h3 { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+  .node .tag { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-top: 2px; }
+  .node ul { margin-top: 10px; padding-left: 16px; font-size: 13px; color: #334155; }
+  .node ul li { margin-top: 4px; }
+  .node.vue { border-top: 3px solid var(--vue); }
+  .node.py { border-top: 3px solid var(--py); }
+  .node.data { border-top: 3px solid var(--muted); }
+  .arrow { align-self: center; text-align: center; color: var(--line); font-size: 22px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .label { display: inline-block; font-size: 11px; color: var(--muted);
+    background: var(--accent-soft); border: 1px solid #dbeafe; color: var(--accent);
+    padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px;
+    background: #f1f5f9; border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; }
+  .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+  .grid-list .item { font-size: 13px; padding: 8px 10px; background: #fff;
+    border: 1px solid var(--border); border-radius: 8px; }
+  .grid-list .item .mono { background: transparent; border: 0; padding: 0; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .ok { color: var(--ok); }
+  .warn { color: var(--warn); }
+  footer { margin-top: 30px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <span class="pill">Day 1 · Inventory Management · Architecture</span>
+    <h1 style="margin-top:10px;">Factory Inventory Management System</h1>
+    <div class="sub">Full-stack demo: Vue 3 SPA · FastAPI · JSON-file mock data — no database, no auth.</div>
+  </header>
+
+  <section>
+    <h2>System map</h2>
+    <div class="row cols-3">
+      <div class="node vue">
+        <h3>Vue 3 SPA · port 3000</h3>
+        <div class="tag">Vite · Composition API · vue-router</div>
+        <ul>
+          <li><span class="mono">App.vue</span> · top-nav + FilterBar + router-view</li>
+          <li><span class="mono">views/</span> · Dashboard · Inventory · Orders · Spending · Demand · Backlog · Reports</li>
+          <li><span class="mono">composables/</span> · useFilters · useI18n · useAuth</li>
+          <li><span class="mono">api.js</span> · axios client → http://localhost:8001/api</li>
+        </ul>
+      </div>
+      <div class="arrow">→</div>
+      <div class="node py">
+        <h3>FastAPI · port 8001</h3>
+        <div class="tag">Pydantic · uvicorn · in-memory filtering</div>
+        <ul>
+          <li><span class="mono">main.py</span> · routes + Pydantic models + CORS *</li>
+          <li><span class="mono">apply_filters()</span> · warehouse · category · status</li>
+          <li><span class="mono">filter_by_month()</span> · month or quarter (Q1-2025…)</li>
+          <li>OpenAPI docs at <span class="mono">/docs</span></li>
+        </ul>
+      </div>
+      <div class="arrow">→</div>
+      <div class="node data">
+        <h3>JSON mock data</h3>
+        <div class="tag">server/data/*.json · loaded at startup</div>
+        <ul>
+          <li>inventory · orders · backlog · purchase_orders</li>
+          <li>demand_forecasts · transactions · spending</li>
+          <li>Changes don't persist — restart reloads from disk</li>
+        </ul>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--vue)"></i>Vue 3 frontend</span>
+      <span><i style="background:var(--py)"></i>Python FastAPI</span>
+      <span><i style="background:var(--muted)"></i>JSON data files</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Data flow — single user click</h2>
+    <div class="row cols-4" style="gap:10px;">
+      <div class="node">
+        <div class="label">1 · UI</div>
+        <h3 style="margin-top:6px;">User selects a filter</h3>
+        <p style="font-size:13px;color:#475569;margin-top:6px;">
+          FilterBar binds to the <span class="mono">useFilters()</span> composable: warehouse · category · status · month.
+        </p>
+      </div>
+      <div class="node">
+        <div class="label">2 · Composable</div>
+        <h3 style="margin-top:6px;">Reactive ref changes</h3>
+        <p style="font-size:13px;color:#475569;margin-top:6px;">
+          Each view <span class="mono">watch()</span>es the relevant refs and calls its loader.
+        </p>
+      </div>
+      <div class="node">
+        <div class="label">3 · API</div>
+        <h3 style="margin-top:6px;">Axios GET with params</h3>
+        <p style="font-size:13px;color:#475569;margin-top:6px;">
+          <span class="mono">api.js</span> serialises filters into query string; FastAPI validates with Pydantic.
+        </p>
+      </div>
+      <div class="node">
+        <div class="label">4 · Render</div>
+        <h3 style="margin-top:6px;">Computed properties</h3>
+        <p style="font-size:13px;color:#475569;margin-top:6px;">
+          Raw response → reactive <span class="mono">ref</span> → derived <span class="mono">computed</span> → SVG charts / tables.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>HTTP surface (port 8001)</h2>
+    <table>
+      <thead>
+        <tr><th style="width:22%">Endpoint</th><th style="width:48%">Purpose</th><th>Filters</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="mono">GET /api/inventory</span></td><td>Inventory items across warehouses</td><td>warehouse, category</td></tr>
+        <tr><td><span class="mono">GET /api/inventory/{id}</span></td><td>One inventory item</td><td>—</td></tr>
+        <tr><td><span class="mono">GET /api/orders</span></td><td>Order list with status</td><td>warehouse, category, status, month</td></tr>
+        <tr><td><span class="mono">GET /api/orders/{id}</span></td><td>One order</td><td>—</td></tr>
+        <tr><td><span class="mono">GET /api/demand</span></td><td>Demand forecasts + trend</td><td>—</td></tr>
+        <tr><td><span class="mono">GET /api/backlog</span></td><td>Backlog items + PO state</td><td>—</td></tr>
+        <tr><td><span class="mono">GET /api/dashboard/summary</span></td><td>KPI tiles for the Overview page</td><td>warehouse, category, status, month</td></tr>
+        <tr><td><span class="mono">GET /api/spending/*</span></td><td>summary · monthly · categories · transactions</td><td>—</td></tr>
+        <tr><td><span class="mono">GET /api/reports/quarterly</span></td><td>Per-quarter revenue + fulfilment rate</td><td>— (no filters honoured)</td></tr>
+        <tr><td><span class="mono">GET /api/reports/monthly-trends</span></td><td>Month-over-month order count / revenue</td><td>— (no filters honoured)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Conventions to preserve</h2>
+    <div class="row cols-2">
+      <div class="node">
+        <h3>Reactivity</h3>
+        <ul>
+          <li>Raw data lives in <span class="mono">ref()</span>; derived data in <span class="mono">computed()</span> — never mutate a computed.</li>
+          <li><span class="mono">v-for</span> keys are stable IDs (<span class="mono">sku</span>, <span class="mono">order_number</span>, <span class="mono">month</span>) — never the array index.</li>
+          <li>Validate dates before <span class="mono">.getMonth()</span> — some <span class="mono">order_date</span> values are nullable.</li>
+        </ul>
+      </div>
+      <div class="node">
+        <h3>i18n &amp; filters</h3>
+        <ul>
+          <li>Every visible string goes through <span class="mono">t('namespace.key')</span> from <span class="mono">useI18n()</span> — locale files in <span class="mono">src/locales/{en,ja}.js</span>.</li>
+          <li>Views consume the global <span class="mono">useFilters()</span> composable; never hold a private copy.</li>
+          <li>Backend filter params accept the literal <span class="mono">'all'</span> sentinel — guard for it.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Known drift (planted bugs)</h2>
+    <p style="color:var(--muted);font-size:13.5px;margin-bottom:10px;">
+      The workshop seeds Reports and Backlog with regressions. The canonical reference pages are
+      <span class="mono">Dashboard.vue</span> and <span class="mono">Orders.vue</span>.
+    </p>
+    <div class="grid-list">
+      <div class="item warn">App.vue nav label <span class="mono">"Reports"</span> bypasses <span class="mono">t()</span></div>
+      <div class="item warn">Reports.vue ignores the global filter bar</div>
+      <div class="item warn">Reports.vue spams <span class="mono">console.log</span></div>
+      <div class="item warn">Backlog.vue strings are hardcoded English</div>
+    </div>
+  </section>
+
+  <footer>
+    Generated for the Partner Basecamp workshop · open the API contract live at
+    <span class="mono">http://localhost:8001/docs</span>.
+  </footer>
+
+</div>
+</body>
+</html>
