@@ -6,8 +6,112 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
+    backlog: 'バックログ',
+    reports: 'レポート',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
+  },
+
+  // Shared primitives
+  common: {
+    loading: '読み込み中…',
+    noData: 'データがありません'
+  },
+
+  // Reports
+  reports: {
+    title: 'パフォーマンスレポート',
+    description: '四半期業績と月次トレンド。',
+    quarterly: {
+      title: '四半期業績',
+      headers: {
+        quarter: '四半期',
+        totalOrders: '注文総数',
+        totalRevenue: '総売上',
+        avgOrderValue: '平均注文額',
+        fulfillmentRate: '達成率'
+      }
+    },
+    monthlyChart: {
+      title: '月次売上トレンド'
+    },
+    monthlyAnalysis: {
+      title: '月次分析',
+      headers: {
+        month: '月',
+        orders: '注文',
+        revenue: '売上',
+        change: '変化',
+        growthRate: '成長率'
+      }
+    },
+    summary: {
+      totalRevenueYtd: '年初来総売上',
+      avgMonthlyRevenue: '月平均売上',
+      totalOrdersYtd: '年初来注文数',
+      bestQuarter: '最高業績四半期'
+    },
+    empty: '現在のフィルター条件に該当するデータがありません。',
+    na: 'N/A'
+  },
+
+  // Backlog
+  backlog: {
+    title: 'バックログ管理',
+    description: '在庫不足の追跡と解決。',
+    highPriority: '高優先度',
+    mediumPriority: '中優先度',
+    lowPriority: '低優先度',
+    totalBacklog: 'バックログ総数',
+    itemsTitle: 'バックログ項目',
+    emptyState: 'バックログ項目はありません — すべての注文は履行可能です。',
+    unitsShort: '個不足',
+    days: '日',
+    table: {
+      orderId: '注文ID',
+      sku: 'SKU',
+      itemName: '商品名',
+      quantityNeeded: '必要数',
+      quantityAvailable: '在庫数',
+      shortage: '不足',
+      daysDelayed: '遅延日数',
+      priority: '優先度'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充',
+    description: '需要予測から予算に応じた補充を計画し、注文を発注します。',
+    budget: {
+      title: '予算',
+      label: '利用可能'
+    },
+    recommendations: {
+      title: '推奨アイテム',
+      totalCost: '予定支出',
+      empty: 'この予算では推奨アイテムがありません。スライダーを上げてみてください。'
+    },
+    table: {
+      sku: 'SKU',
+      itemName: 'アイテム',
+      trend: 'トレンド',
+      currentDemand: '現在',
+      forecastedDemand: '予測',
+      quantity: '推奨数量',
+      unitCost: '単価',
+      lineTotal: '行合計'
+    },
+    placeOrder: '注文を発注',
+    submitting: '送信中…',
+    success: '注文 {number} を送信しました — 注文 → 送信済み注文 を参照。',
+    submitted: {
+      title: '送信済み注文',
+      leadTime: 'リードタイム',
+      days: '日',
+      none: 'まだ送信済み注文はありません。'
+    }
   },
 
   // Dashboard

@@ -60,6 +60,16 @@ npm install && npm run dev
 4. Inventory filters don't support month (no time dimension)
 5. Revenue goals: $800K/month single, $9.6M YTD all months
 
+## Reference patterns (use these as the source of truth)
+- **i18n contract**: every visible string goes through `t('namespace.key')` from `useI18n()`. Locale files in `src/locales/{en,ja}.js`. Nav labels in `App.vue` MUST use `t('nav.xxx')` — no inline English.
+- **Filter contract**: views consume `useFilters()`; never hold a private filter copy. Backend params accept the literal `'all'` sentinel — guard for it before adding query string entries.
+- **Canonical view pages**: `Dashboard.vue` and `Orders.vue`. Match their structure (ref → watch → loader → computed → template) when fixing or building views.
+
+## Known drift (planted bugs — workshop seed data, fix on demand)
+- `App.vue` Reports nav label is hardcoded English.
+- `Reports.vue` ignores the global FilterBar and spams `console.log`.
+- `Backlog.vue` strings are hardcoded English instead of `t()`.
+
 ## File Locations
 - Views: `client/src/views/*.vue`
 - API Client: `client/src/api.js`

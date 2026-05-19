@@ -2,7 +2,11 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 from pydantic import BaseModel
+from datetime import datetime, timedelta, timezone
+import uuid
 from mock_data import inventory_items, orders, demand_forecasts, backlog_items, spending_summary, monthly_spending, category_spending, recent_transactions, purchase_orders
+
+RESTOCK_LEAD_TIME_DAYS = 5
 
 app = FastAPI(title="Factory Inventory Management System")
 
@@ -80,6 +84,7 @@ class Order(BaseModel):
     actual_delivery: Optional[str] = None
     warehouse: Optional[str] = None
     category: Optional[str] = None
+    source: Optional[str] = None
 
 class DemandForecast(BaseModel):
     id: str
@@ -119,6 +124,27 @@ class CreatePurchaseOrderRequest(BaseModel):
     unit_cost: float
     expected_delivery_date: str
     notes: Optional[str] = None
+
+class RestockingRecommendation(BaseModel):
+    sku: str
+    name: str
+    category: Optional[str] = None
+    warehouse: Optional[str] = None
+    current_demand: int
+    forecasted_demand: int
+    trend: str
+    demand_gap: int
+    unit_cost: float
+    recommended_quantity: int
+    line_cost: float
+
+class RestockOrderItem(BaseModel):
+    sku: str
+    quantity: int
+
+class RestockOrderRequest(BaseModel):
+    items: List[RestockOrderItem]
+    budget: Optional[float] = None
 
 # API endpoints
 @app.get("/")
@@ -228,14 +254,19 @@ def get_recent_transactions():
     return recent_transactions
 
 @app.get("/api/reports/quarterly")
-def get_quarterly_reports():
-    """Get quarterly performance reports"""
-    # Calculate quarterly statistics from orders
-    quarters = {}
+def get_quarterly_reports(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None,
+):
+    """Quarterly performance, honouring the global FilterBar."""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
 
-    for order in orders:
+    quarters = {}
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
-        # Determine quarter
         if '2025-01' in order_date or '2025-02' in order_date or '2025-03' in order_date:
             quarter = 'Q1-2025'
         elif '2025-04' in order_date or '2025-05' in order_date or '2025-06' in order_date:
@@ -247,62 +278,167 @@ def get_quarterly_reports():
         else:
             continue
 
-        if quarter not in quarters:
-            quarters[quarter] = {
-                'quarter': quarter,
-                'total_orders': 0,
-                'total_revenue': 0,
-                'delivered_orders': 0,
-                'avg_order_value': 0
-            }
-
-        quarters[quarter]['total_orders'] += 1
-        quarters[quarter]['total_revenue'] += order.get('total_value', 0)
+        bucket = quarters.setdefault(quarter, {
+            'quarter': quarter,
+            'total_orders': 0,
+            'total_revenue': 0,
+            'delivered_orders': 0,
+            'avg_order_value': 0,
+            'fulfillment_rate': 0,
+        })
+        bucket['total_orders'] += 1
+        bucket['total_revenue'] += order.get('total_value', 0)
         if order.get('status') == 'Delivered':
-            quarters[quarter]['delivered_orders'] += 1
+            bucket['delivered_orders'] += 1
 
-    # Calculate averages and fulfillment rate
     result = []
-    for q, data in quarters.items():
+    for data in quarters.values():
         if data['total_orders'] > 0:
             data['avg_order_value'] = round(data['total_revenue'] / data['total_orders'], 2)
             data['fulfillment_rate'] = round((data['delivered_orders'] / data['total_orders']) * 100, 1)
         result.append(data)
-
-    # Sort by quarter
     result.sort(key=lambda x: x['quarter'])
     return result
 
 @app.get("/api/reports/monthly-trends")
-def get_monthly_trends():
-    """Get month-over-month trends"""
-    months = {}
+def get_monthly_trends(
+    warehouse: Optional[str] = None,
+    category: Optional[str] = None,
+    status: Optional[str] = None,
+    month: Optional[str] = None,
+):
+    """Month-over-month trends, honouring the global FilterBar."""
+    filtered_orders = apply_filters(orders, warehouse, category, status)
+    filtered_orders = filter_by_month(filtered_orders, month)
 
-    for order in orders:
+    months = {}
+    for order in filtered_orders:
         order_date = order.get('order_date', '')
         if not order_date:
             continue
-
-        # Extract month (format: YYYY-MM-DD)
-        month = order_date[:7]  # Gets YYYY-MM
-
-        if month not in months:
-            months[month] = {
-                'month': month,
-                'order_count': 0,
-                'revenue': 0,
-                'delivered_count': 0
-            }
-
-        months[month]['order_count'] += 1
-        months[month]['revenue'] += order.get('total_value', 0)
+        bucket_key = order_date[:7]
+        bucket = months.setdefault(bucket_key, {
+            'month': bucket_key,
+            'order_count': 0,
+            'revenue': 0,
+            'delivered_count': 0,
+        })
+        bucket['order_count'] += 1
+        bucket['revenue'] += order.get('total_value', 0)
         if order.get('status') == 'Delivered':
-            months[month]['delivered_count'] += 1
+            bucket['delivered_count'] += 1
 
-    # Convert to list and sort
     result = list(months.values())
     result.sort(key=lambda x: x['month'])
     return result
+
+@app.get("/api/restocking/recommendations", response_model=List[RestockingRecommendation])
+def get_restocking_recommendations(budget: float = 10000.0):
+    """Budget-fit restocking. Sources from inventory (items at/under reorder_point),
+    layers in demand-forecast bias for matching SKUs. Items with a healthy buffer
+    AND no positive demand signal are skipped."""
+    forecast_by_sku = {f["item_sku"]: f for f in demand_forecasts}
+    candidates = []
+    for inv in inventory_items:
+        sku = inv["sku"]
+        on_hand = inv.get("quantity_on_hand", 0)
+        reorder = inv.get("reorder_point", 0)
+        unit_cost = inv.get("unit_cost", 0)
+        shortage = max(reorder - on_hand, 0)
+        forecast = forecast_by_sku.get(sku)
+        trend = (forecast.get("trend") if forecast else None) or "stable"
+        current_demand = (forecast.get("current_demand") if forecast else 0) or 0
+        forecasted_demand = (forecast.get("forecasted_demand") if forecast else 0) or 0
+        gap = max(forecasted_demand - current_demand, 0)
+        # Skip well-stocked items with no demand pressure
+        if shortage == 0 and gap == 0 and trend != "increasing":
+            continue
+        demand_lift = gap
+        if trend == "increasing":
+            demand_lift = max(demand_lift, max(reorder // 4, 1))
+        recommend_qty = shortage + demand_lift
+        if recommend_qty <= 0 or unit_cost <= 0:
+            continue
+        candidates.append({
+            "sku": sku,
+            "name": inv.get("name", sku),
+            "category": inv.get("category"),
+            "warehouse": inv.get("warehouse"),
+            "current_demand": current_demand,
+            "forecasted_demand": forecasted_demand,
+            "trend": trend,
+            "demand_gap": gap,
+            "unit_cost": unit_cost,
+            "recommended_quantity": recommend_qty,
+            "line_cost": round(recommend_qty * unit_cost, 2),
+        })
+    candidates.sort(key=lambda c: c["line_cost"], reverse=True)
+    remaining = float(budget)
+    out = []
+    for c in candidates:
+        affordable_qty = int(remaining // c["unit_cost"])
+        if affordable_qty <= 0:
+            continue
+        qty = min(c["recommended_quantity"], affordable_qty)
+        if qty <= 0:
+            continue
+        c["recommended_quantity"] = qty
+        c["line_cost"] = round(qty * c["unit_cost"], 2)
+        out.append(c)
+        remaining -= c["line_cost"]
+    return out
+
+@app.get("/api/restocking/orders", response_model=List[Order])
+def get_restocking_orders():
+    """All orders submitted via the Restocking tab, unfiltered.
+    Path is /api/restocking/orders (not /api/orders/restocking) to avoid the
+    /api/orders/{order_id} route catching 'restocking' as an id."""
+    return [o for o in orders if o.get("source") == "restocking"]
+
+@app.post("/api/orders/restock", response_model=Order)
+def submit_restock_order(req: RestockOrderRequest):
+    """Place a restocking order. New orders persist in-memory and reset on server restart."""
+    if not req.items:
+        raise HTTPException(status_code=400, detail="No items provided")
+    sku_to_item = {item["sku"]: item for item in inventory_items}
+    order_items = []
+    total_value = 0.0
+    for line in req.items:
+        if line.quantity <= 0:
+            continue
+        inv = sku_to_item.get(line.sku)
+        if not inv:
+            raise HTTPException(status_code=404, detail=f"SKU {line.sku} not found in inventory")
+        line_total = round(line.quantity * inv["unit_cost"], 2)
+        total_value += line_total
+        order_items.append({
+            "sku": inv["sku"],
+            "name": inv["name"],
+            "quantity": line.quantity,
+            "unit_price": inv["unit_cost"],
+            "line_total": line_total,
+        })
+    if not order_items:
+        raise HTTPException(status_code=400, detail="No valid items in restock request")
+    today = datetime.now(timezone.utc).date()
+    eta = today + timedelta(days=RESTOCK_LEAD_TIME_DAYS)
+    short_id = uuid.uuid4().hex[:8].upper()
+    new_order = {
+        "id": f"ord-restock-{short_id.lower()}",
+        "order_number": f"REORD-{short_id}",
+        "customer": "Internal Restock",
+        "items": order_items,
+        "status": "Processing",
+        "order_date": today.strftime("%Y-%m-%d"),
+        "expected_delivery": eta.strftime("%Y-%m-%d"),
+        "total_value": round(total_value, 2),
+        "actual_delivery": None,
+        "warehouse": None,
+        "category": None,
+        "source": "restocking",
+    }
+    orders.append(new_order)
+    return new_order
 
 if __name__ == "__main__":
     import uvicorn

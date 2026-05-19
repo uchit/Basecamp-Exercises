@@ -6,8 +6,112 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
+    backlog: 'Backlog',
+    reports: 'Reports',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
+  },
+
+  // Shared primitives
+  common: {
+    loading: 'Loading…',
+    noData: 'No data'
+  },
+
+  // Reports
+  reports: {
+    title: 'Performance Reports',
+    description: 'Quarterly performance metrics and monthly trends.',
+    quarterly: {
+      title: 'Quarterly Performance',
+      headers: {
+        quarter: 'Quarter',
+        totalOrders: 'Total Orders',
+        totalRevenue: 'Total Revenue',
+        avgOrderValue: 'Avg Order Value',
+        fulfillmentRate: 'Fulfillment Rate'
+      }
+    },
+    monthlyChart: {
+      title: 'Monthly Revenue Trend'
+    },
+    monthlyAnalysis: {
+      title: 'Month-over-Month Analysis',
+      headers: {
+        month: 'Month',
+        orders: 'Orders',
+        revenue: 'Revenue',
+        change: 'Change',
+        growthRate: 'Growth Rate'
+      }
+    },
+    summary: {
+      totalRevenueYtd: 'Total Revenue (YTD)',
+      avgMonthlyRevenue: 'Avg Monthly Revenue',
+      totalOrdersYtd: 'Total Orders (YTD)',
+      bestQuarter: 'Best Performing Quarter'
+    },
+    empty: 'No report data for the current filters.',
+    na: 'N/A'
+  },
+
+  // Backlog
+  backlog: {
+    title: 'Backlog Management',
+    description: 'Track and resolve inventory shortages.',
+    highPriority: 'High Priority',
+    mediumPriority: 'Medium Priority',
+    lowPriority: 'Low Priority',
+    totalBacklog: 'Total Backlog Items',
+    itemsTitle: 'Backlog Items',
+    emptyState: 'No backlog items — all orders can be fulfilled.',
+    unitsShort: 'units short',
+    days: 'days',
+    table: {
+      orderId: 'Order ID',
+      sku: 'SKU',
+      itemName: 'Item Name',
+      quantityNeeded: 'Quantity Needed',
+      quantityAvailable: 'Quantity Available',
+      shortage: 'Shortage',
+      daysDelayed: 'Days Delayed',
+      priority: 'Priority'
+    }
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Plan budget-fit restocks from demand forecasts and place orders.',
+    budget: {
+      title: 'Budget',
+      label: 'Available'
+    },
+    recommendations: {
+      title: 'Recommended items',
+      totalCost: 'Projected spend',
+      empty: 'No items recommended at this budget. Try increasing the slider.'
+    },
+    table: {
+      sku: 'SKU',
+      itemName: 'Item',
+      trend: 'Trend',
+      currentDemand: 'Current',
+      forecastedDemand: 'Forecast',
+      quantity: 'Suggested Qty',
+      unitCost: 'Unit Cost',
+      lineTotal: 'Line Total'
+    },
+    placeOrder: 'Place Order',
+    submitting: 'Placing…',
+    success: 'Order {number} submitted — see Orders → Submitted Orders.',
+    submitted: {
+      title: 'Submitted Orders',
+      leadTime: 'Lead Time',
+      days: 'days',
+      none: 'No submitted orders yet.'
+    }
   },
 
   // Dashboard
