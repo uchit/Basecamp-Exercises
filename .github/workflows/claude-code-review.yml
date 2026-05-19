@@ -1,0 +1,43 @@
+name: Claude Code Review
+
+# Reviews every new PR with Claude. Runs after PR is opened or new commits pushed.
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+jobs:
+  claude-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review this pull request. Focus on:
+
+            - Bugs and logic errors
+            - Security issues (injection, auth, secrets accidentally committed)
+            - Performance regressions and obviously expensive operations
+            - Test coverage gaps for new logic
+            - Consistency with the existing code style in this repo
+
+            Post inline comments on the specific lines that matter. End with a
+            single summary review:
+              - Approve the PR if there are no blocking issues
+              - Request changes only when something would break a customer
+
+            Be direct and specific. Cite exact files and line numbers.
