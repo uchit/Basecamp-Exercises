@@ -589,6 +589,242 @@
   /* ------------------------------------------------------------------ */
   .hidden { display: none !important; }
   ::selection { background: var(--accent); color: #fff; }
+
+  /* ------------------------------------------------------------------ */
+  /*  Visual evidence gallery                                           */
+  /* ------------------------------------------------------------------ */
+  .gallery {
+    margin-top: 32px;
+    margin-bottom: 96px;
+  }
+  .gallery-head {
+    max-width: 720px;
+    margin-bottom: 64px;
+  }
+  .gallery .eyebrow-line {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .gallery h2 {
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: clamp(36px, 4.5vw, 56px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .gallery-blurb {
+    color: var(--ink-muted);
+    font-size: 18px;
+    margin-top: 16px;
+    letter-spacing: -0.005em;
+    max-width: 640px;
+  }
+
+  .chapter {
+    margin-top: 88px;
+  }
+  .chapter:first-of-type { margin-top: 0; }
+
+  .chapter-eyebrow {
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .chapter h3 {
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 8px 0 32px;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 880px) { .tile-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .tile-grid { grid-template-columns: 1fr; } }
+
+  .tile {
+    appearance: none;
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1),
+                box-shadow 0.25s cubic-bezier(.4,0,.2,1),
+                border-color 0.2s ease;
+    font-family: inherit;
+    color: inherit;
+    display: block;
+  }
+  .tile:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--line);
+  }
+  .tile:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .tile-frame {
+    aspect-ratio: 16 / 10;
+    background: var(--surface-2);
+    position: relative;
+    overflow: hidden;
+  }
+  .tile-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  .tile:hover .tile-frame img { transform: scale(1.02); }
+
+  .tile-cap {
+    padding: 16px 18px 18px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .tile-cap .t {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.003em;
+  }
+  .tile-cap .s {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s cubic-bezier(.4,0,.2,1);
+    padding: 64px 48px;
+  }
+  .lightbox.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .lightbox-inner {
+    max-width: 92vw;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,.7);
+    object-fit: contain;
+    background: #fff;
+  }
+  .lb-cap {
+    color: #f5f5f7;
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    text-align: center;
+    max-width: 640px;
+  }
+  .lb-cap .s {
+    display: block;
+    color: rgba(245, 245, 247, 0.55);
+    font-weight: 400;
+    font-size: 13.5px;
+    margin-top: 6px;
+    letter-spacing: -0.002em;
+  }
+  .lb-controls button {
+    position: fixed;
+    background: rgba(255,255,255,.08);
+    color: #f5f5f7;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 500;
+    transition: background 0.18s ease, transform 0.18s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .lb-controls button:hover {
+    background: rgba(255,255,255,.18);
+    transform: scale(1.04);
+  }
+  .lb-close {
+    top: 28px; right: 28px;
+    width: 40px; height: 40px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 17px;
+  }
+  .lb-prev, .lb-next {
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px; height: 48px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .lb-prev:hover, .lb-next:hover { transform: translateY(-50%) scale(1.04); }
+  .lb-prev { left: 28px; }
+  .lb-next { right: 28px; }
+  .lb-counter {
+    position: fixed;
+    top: 36px; left: 32px;
+    color: rgba(245, 245, 247, 0.5);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+  }
+  .lb-hint {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(245, 245, 247, 0.35);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
 </style>
 </head>
 <body>
@@ -631,6 +867,32 @@
   <div class="shell" id="sessionsRoot"></div>
 
   <div class="shell">
+    <section class="gallery">
+      <div class="gallery-head">
+        <div class="eyebrow-line">Visual Evidence</div>
+        <h2>Look at the thing.</h2>
+        <p class="gallery-blurb">Fifteen frame-perfect Playwright captures of the live inventory app, plus the generated architecture page. Tap any image to view it full-size. Use ← → to flick through the story.</p>
+      </div>
+
+      <div class="chapter" data-chapter="1">
+        <div class="chapter-eyebrow">Chapter 1</div>
+        <h3>The app at rest.</h3>
+        <div class="tile-grid"></div>
+      </div>
+
+      <div class="chapter" data-chapter="2">
+        <div class="chapter-eyebrow">Chapter 2</div>
+        <h3>Restocking, end to end.</h3>
+        <div class="tile-grid"></div>
+      </div>
+
+      <div class="chapter" data-chapter="3">
+        <div class="chapter-eyebrow">Chapter 3</div>
+        <h3>Polish that proves it.</h3>
+        <div class="tile-grid"></div>
+      </div>
+    </section>
+
     <section class="ci-section">
       <h2>Continuous integration on the fork</h2>
       <p class="blurb">PR #4 wired three GitHub Actions workflows and configured the repo so they have the tokens they need. Every future PR is auto-reviewed by Claude and auto-approved.</p>
@@ -663,6 +925,20 @@
     <a href="https://github.com/uchit/Basecamp-Exercises/blob/main/STATUS.html" target="_blank">view STATUS.html source</a>
   </div>
 </footer>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Visual evidence">
+  <div class="lightbox-inner">
+    <img id="lbImg" src="" alt="" />
+    <div class="lb-cap"><span id="lbTitle"></span><span class="s" id="lbSub"></span></div>
+  </div>
+  <div class="lb-controls">
+    <button class="lb-close" aria-label="Close (Escape)">✕</button>
+    <button class="lb-prev" aria-label="Previous (Left arrow)">‹</button>
+    <button class="lb-next" aria-label="Next (Right arrow)">›</button>
+  </div>
+  <div class="lb-counter" id="lbCounter"></div>
+  <div class="lb-hint">Esc to close · ← → to navigate</div>
+</div>
 
 <script>
   const REPO = "https://github.com/uchit/Basecamp-Exercises/blob/main";
@@ -1058,9 +1334,104 @@
   } catch (e) {}
 
   /* -------------------------------------------------------------------- */
+  /*  Visual evidence gallery                                             */
+  /* -------------------------------------------------------------------- */
+
+  const SHOTS_DIR = "day1/01_inventory-management/screenshots";
+
+  const GALLERY = [
+    // Chapter 1 — The app at rest
+    { ch: 1, file: "00-architecture.png",         t: "Architecture overview",       s: "Step 5 deliverable — generated system map · stack · data flow" },
+    { ch: 1, file: "01-overview.png",             t: "Overview",                    s: "Dashboard · KPI cards · order-health donut" },
+    { ch: 1, file: "02-inventory.png",            t: "Inventory",                   s: "Stock levels across all warehouses" },
+    { ch: 1, file: "03-orders.png",               t: "Orders",                      s: "Customer orders, status filtered" },
+    { ch: 1, file: "04-finance.png",              t: "Finance",                     s: "Revenue, costs, monthly flow" },
+    { ch: 1, file: "05-demand.png",               t: "Demand",                      s: "Forecast trends per item" },
+    { ch: 1, file: "06-restocking.png",           t: "Restocking",                  s: "Budget slider · ranked recommendations · Place Order" },
+    { ch: 1, file: "07-backlog.png",              t: "Backlog",                     s: "Shortages, fully i18n-migrated" },
+    { ch: 1, file: "08-reports.png",              t: "Reports",                     s: "Quarterly + monthly, FilterBar-aware" },
+
+    // Chapter 2 — Restocking flow end to end
+    { ch: 2, file: "09-restocking-slider.png",    t: "Budget set to $22,000",       s: "Slider drag triggers a fresh recommendation pass" },
+    { ch: 2, file: "10-restocking-after-submit.png", t: "REORD submitted",          s: "Success state after Place Order — order persists in-memory" },
+    { ch: 2, file: "11-orders-submitted.png",     t: "Submitted Orders section",    s: "New restock surfaces on /orders with lead-time column" },
+
+    // Chapter 3 — Polish that proves it
+    { ch: 3, file: "12-japanese.png",             t: "日本語",                       s: "EN → JA flips every nav label · cleared the planted i18n bug" },
+    { ch: 3, file: "13-sidebar-collapsed.png",    t: "Sidebar collapsed",           s: "Icons-only mode · localStorage-persisted · auto < 960px" },
+    { ch: 3, file: "14-reports-filtered.png",     t: "Reports filtered to Q1-2025", s: "FilterBar reactivity — Reports endpoint now honours filters" },
+  ];
+
+  function renderGallery() {
+    for (const ch of [1, 2, 3]) {
+      const grid = document.querySelector(`.chapter[data-chapter="${ch}"] .tile-grid`);
+      GALLERY.filter(g => g.ch === ch).forEach((g) => {
+        const idx = GALLERY.indexOf(g);
+        const tile = el("button", {
+            class: "tile",
+            "aria-label": `${g.t} — view full size`,
+            onclick: () => openLightbox(idx),
+          },
+          el("div", { class: "tile-frame" },
+            el("img", {
+              src: `${SHOTS_DIR}/${g.file}`,
+              alt: g.t,
+              loading: "lazy",
+              decoding: "async",
+            }),
+          ),
+          el("div", { class: "tile-cap" },
+            el("div", { class: "t" }, g.t),
+            el("div", { class: "s" }, g.s),
+          ),
+        );
+        grid.appendChild(tile);
+      });
+    }
+  }
+
+  let lbIdx = 0;
+  const lb = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbTitle = document.getElementById("lbTitle");
+  const lbSub = document.getElementById("lbSub");
+  const lbCounter = document.getElementById("lbCounter");
+
+  function openLightbox(i) {
+    lbIdx = i;
+    const g = GALLERY[i];
+    lbImg.src = `${SHOTS_DIR}/${g.file}`;
+    lbImg.alt = g.t;
+    lbTitle.textContent = g.t;
+    lbSub.textContent = g.s;
+    lbCounter.textContent = `${String(i + 1).padStart(2, "0")} / ${GALLERY.length}`;
+    lb.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeLightbox() {
+    lb.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  function navLb(delta) {
+    openLightbox((lbIdx + delta + GALLERY.length) % GALLERY.length);
+  }
+
+  document.querySelector(".lb-close").addEventListener("click", closeLightbox);
+  document.querySelector(".lb-prev").addEventListener("click", () => navLb(-1));
+  document.querySelector(".lb-next").addEventListener("click", () => navLb(1));
+  lb.addEventListener("click", (e) => { if (e.target === lb) closeLightbox(); });
+  document.addEventListener("keydown", (e) => {
+    if (!lb.classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    else if (e.key === "ArrowLeft") navLb(-1);
+    else if (e.key === "ArrowRight") navLb(1);
+  });
+
+  /* -------------------------------------------------------------------- */
   /*  Boot                                                                */
   /* -------------------------------------------------------------------- */
   renderAll();
+  renderGallery();
 </script>
 
 </body>
