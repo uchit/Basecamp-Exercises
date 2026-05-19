@@ -1,0 +1,235 @@
+{
+  "rfp_name": "Helios sample RFP",
+  "total_questions": 5,
+  "answers": [
+    {
+      "question_id": "Q1",
+      "category": "technical",
+      "answer": "Helios Sentinel employs a multi-layered real-time threat detection engine that combines signature-based matching, behavioral analysis, and ML-driven anomaly detection, validated quarterly against the MITRE ATT&CK framework. Ingested data sources include endpoint telemetry (process events, file system changes, network connections), cloud workload logs (AWS CloudTrail, Azure Activity Log, GCP Audit Log), network flow data (NetFlow v9/IPFIX), and email gateway events \u2014 all processed at up to 50,000 events per second per tenant. Detection-to-alert latency averages 2.3 seconds for signature-based matches and 18 seconds for behavioral anomaly detections. The platform maintains a 99.7% true positive rate across its top 100 detection rules.",
+      "sources": [
+        "Helios Platform Architecture Doc v4.2",
+        "Acme Corp RFP Response \u2014 March 2024"
+      ],
+      "confidence": "high",
+      "flags": []
+    },
+    {
+      "question_id": "Q2",
+      "category": "compliance",
+      "answer": "Helios Security currently holds the following compliance certifications: (1) SOC 2 Type II \u2014 most recent audit completed December 2024 by Deloitte; (2) ISO 27001:2022 \u2014 certified March 2024 by BSI; (3) FedRAMP Moderate Authorization \u2014 authorized June 2024, sponsored by the Department of Homeland Security (DHS); (4) HIPAA \u2014 last assessment October 2024, with a Business Associate Agreement (BAA) available; (5) PCI DSS v4.0 Level 1 Service Provider \u2014 validated September 2024 by Coalfire; and (6) StateRAMP \u2014 authorized January 2025. All certifications are maintained on a continuous monitoring basis, supplemented by quarterly internal audits, and audit reports are available upon request under NDA.",
+      "sources": [
+        "Helios Compliance & Certifications Register 2025",
+        "NovaTech RFP Response \u2014 July 2024"
+      ],
+      "confidence": "high",
+      "flags": []
+    },
+    {
+      "question_id": "Q3",
+      "category": "pricing",
+      "answer": "Helios Security's EPP+EDR bundle is priced per seat per month as follows: 500 endpoints at $18/seat/month ($108,000/year), 1,000 endpoints at $15/seat/month ($180,000/year, a 17% volume discount), and 5,000 endpoints at $11/seat/month ($660,000/year, a 39% volume discount). Volume discounts are automatically applied at each tier, and additional multi-year discounts are available: 5% for a 2-year term and 10% for a 3-year term. The minimum contract term is 12 months. Optional add-ons include SIEM integration (+$6/seat/month) and Managed Detection & Response (MDR) (+$12/seat/month); all pricing excludes professional services.",
+      "sources": [
+        "Helios Commercial Pricing Sheet Q1 2025"
+      ],
+      "confidence": "high",
+      "flags": []
+    },
+    {
+      "question_id": "Q4",
+      "category": "company-info",
+      "answer": "Helios Security currently serves 47 customers in the financial services vertical, spanning 12 banks, 8 insurance carriers, 15 asset management firms, and 12 fintech companies, with an average NPS of 72 in this sector. Three approved reference accounts are: (1) Meridian National Bank \u2014 3,200 endpoints running EPP+EDR+SIEM, deployed since 2022; (2) Crestview Capital Partners \u2014 850 endpoints running EPP+MDR, deployed since 2023; and (3) Apex Insurance Group \u2014 5,100 endpoints on the full Helios platform, deployed since 2021.",
+      "sources": [
+        "Helios Customer Success \u2014 Vertical Report 2024"
+      ],
+      "confidence": "high",
+      "flags": []
+    },
+    {
+      "question_id": "Q5",
+      "category": "technical",
+      "answer": "Both searches converged on the same authoritative source. All required details are present. Composing the final JSON answer now.\n\n{\n  \"question_id\": \"Q5\",\n  \"category\": \"technical\",\n  \"answer\": \"Helios provides full EU data residency through dedicated infrastructure in Frankfurt (AWS eu-central-1) and Dublin (AWS eu-west-1), with a strict guarantee that customer data never leaves the selected region. All data at rest is encrypted using AES-256-GCM with customer-managed keys, supported via AWS KMS or a Bring Your Own Key (BYOK) model, giving customers direct control over their encryption keys. All data in transit \u2014 including API calls and endpoint agent communications \u2014 is protected by TLS 1.3, with additional certificate pinning applied to endpoint agents to prevent interception. A GDPR-compliant Data Processing Agreement (DPA) is included in all EU contracts, data retention is configurable per tenant (default: 90 days for raw telemetry, 13 months for aggregated alerts), and annual third-party penetration testing is conducted by NCC Group.\",\n  \"sources\": [\"Helios Data Sovereignty & Privacy Whitepaper v3.1\"],\n  \"confidence\": \"high\",\n  \"flags\": []\n}",
+      "sources": [],
+      "confidence": "low",
+      "flags": [
+        "model output was not valid JSON"
+      ]
+    }
+  ],
+  "review": {
+    "issues": [
+      {
+        "kind": "other",
+        "question_ids": [
+          "Q5"
+        ],
+        "summary": "Q5's answer is a raw model reasoning trace with embedded JSON rather than a clean answer, and its outer envelope shows confidence 'low' and an empty sources array while the inner JSON claims confidence 'high' and cites a specific source \u2014 creating a direct internal contradiction within the same record.",
+        "recommended_fix": "Replace the Q5 answer with the clean text extracted from the inner JSON object, set the outer confidence to 'high', populate sources with ['Helios Data Sovereignty & Privacy Whitepaper v3.1'], and remove the 'model output was not valid JSON' flag."
+      },
+      {
+        "kind": "numerical",
+        "question_ids": [
+          "Q4"
+        ],
+        "summary": "The financial services customer sub-counts (12 banks + 8 insurance carriers + 15 asset management firms + 12 fintech companies) sum to 47, which matches the stated total, but Apex Insurance Group is listed under financial services references yet insurance carriers are counted separately from fintech/asset management \u2014 this is consistent, however the sub-segment tally of 12+8+15+12 = 47 checks out exactly, so no arithmetic error exists; flagging instead that Q4 lists 12 fintech companies and 12 banks as equal counts, which reviewers may wish to verify is not a copy-paste duplication.",
+        "recommended_fix": "Verify with the Customer Success team that the bank count (12) and fintech count (12) are genuinely identical figures and not a duplication error before sending."
+      }
+    ],
+    "overall_assessment": "The most serious issue is Q5, which was never properly formatted and contains conflicting metadata (low confidence, no sources) contradicting its embedded answer (high confidence, named source); this must be corrected before customer delivery. All other answers are numerically and factually consistent with one another, though the identical sub-counts in Q4 warrant a quick internal verification."
+  },
+  "evals": {
+    "passed": 25,
+    "failed": 0,
+    "details": [
+      {
+        "q": "Q1",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q1",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: high"
+      },
+      {
+        "q": "Q1",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=2 flags=0"
+      },
+      {
+        "q": "Q1",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q2",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q2",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: high"
+      },
+      {
+        "q": "Q2",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=2 flags=0"
+      },
+      {
+        "q": "Q2",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q3",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q3",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: high"
+      },
+      {
+        "q": "Q3",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=0"
+      },
+      {
+        "q": "Q3",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q4",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q4",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: high"
+      },
+      {
+        "q": "Q4",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=0"
+      },
+      {
+        "q": "Q4",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q5",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q5",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: low"
+      },
+      {
+        "q": "Q5",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=0 flags=1"
+      },
+      {
+        "q": "Q5",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q3",
+        "assertion": "pricing_500_seat_cited",
+        "passed": true,
+        "note": "expected $18 or $108,000"
+      },
+      {
+        "q": "Q3",
+        "assertion": "pricing_5000_seat_cited",
+        "passed": true,
+        "note": "expected $11 or $660,000"
+      },
+      {
+        "q": "Q4",
+        "assertion": "names_at_least_two_refs",
+        "passed": true,
+        "note": "expected 2+ of Meridian/Crestview/Apex"
+      },
+      {
+        "q": "Q5",
+        "assertion": "names_eu_region",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "Q5",
+        "assertion": "mentions_encryption",
+        "passed": true,
+        "note": ""
+      }
+    ]
+  }
+}

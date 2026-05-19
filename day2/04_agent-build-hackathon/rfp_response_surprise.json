@@ -1,0 +1,246 @@
+{
+  "rfp_name": "SURPRISE RFP (unseen)",
+  "total_questions": 5,
+  "answers": [
+    {
+      "question_id": "S1",
+      "category": "technical + compliance",
+      "answer": "End-to-end P1 flow for an EU customer: (1) DETECTION \u2014 Helios Sentinel's multi-layered engine ingests endpoint telemetry (process events, file-system changes, network connections), cloud audit logs (CloudTrail, Azure Activity Log, GCP Audit Log), NetFlow v9/IPFIX, and email gateway events. A P1-grade signature match surfaces in \u22642.3 seconds; a behavioural or ML-driven anomaly in \u226418 seconds. The SIEM correlation engine processes up to 50,000 events per second per tenant, and top-100 detection rules carry a validated 99.7% true-positive rate against the MITRE ATT&CK framework. (2) DATA RESIDENCY \u2014 EU customer data is processed exclusively within Frankfurt (AWS eu-central-1) and Dublin (AWS eu-west-1). No customer data leaves the selected EU region at any point during detection, investigation, or response; all telemetry is encrypted at rest (AES-256-GCM with customer-managed keys via AWS KMS or BYOK) and in transit (TLS 1.3 with certificate pinning on endpoint agents). (3) DPA / COMPLIANCE OBLIGATIONS \u2014 A GDPR-compliant Data Processing Agreement is included as standard in all EU contracts. During incident response, Helios acts as data processor; the DPA governs lawful processing of any personal data encountered in telemetry, imposes confidentiality obligations on Helios personnel handling the incident, and \u2014 where the incident constitutes a personal-data breach \u2014 triggers Helios's processor-side obligation to notify the customer (data controller) without undue delay so the controller can meet its 72-hour supervisory-authority reporting window under GDPR Art. 33. Raw telemetry is retained for a configurable period (default 90 days) and aggregated alerts for 13 months, both subject to DPA data-minimisation requirements.",
+      "sources": [
+        "Helios Platform Architecture Doc v4.2",
+        "Acme Corp RFP Response \u2014 March 2024",
+        "Helios Data Sovereignty & Privacy Whitepaper v3.1",
+        "Helios Compliance & Certifications Register 2025"
+      ],
+      "confidence": "medium",
+      "flags": [
+        "P1-specific SLA timelines (e.g., acknowledgement, escalation, resolution targets) were not found in the KB \u2014 human reviewer should add explicit P1 SLA figures from the Support & SLA policy document before sending.",
+        "DPA breach-notification timescales (the specific hours within which Helios notifies the customer as processor) were not found verbatim in the KB; the 72-hour reference above is inferred from GDPR Art. 33 and the general DPA statement \u2014 confirm exact contractual notification window from the standard DPA template.",
+        "Sub-processor list for EU incidents (e.g., AWS as infrastructure sub-processor) was not returned by the KB \u2014 consider including or referencing the sub-processor register to fully satisfy DPA-related RFP scrutiny."
+      ]
+    },
+    {
+      "question_id": "S2",
+      "category": "pricing",
+      "answer": "I have all the pricing data needed. Now I'll compute the figures precisely before drafting the answer.\n\n**Step-by-step math:**\n\n- **Seat count:** 2,500 endpoints \u2014 falls between the 1,000-seat tier ($15/seat/mo) and the 5,000-seat tier ($11/seat/mo). The pricing sheet does not explicitly list a 2,500-seat rate, so I need to flag interpolation.\n- The most defensible approach is to use the **next published tier below** (1,000-seat = $15/seat/mo) as a floor, noting a custom quote is likely needed. However, since RFP responses often use the nearest tier or interpolate linearly, I'll flag this for human review.\n- **Add-ons:** SIEM = +$6/seat/mo; MDR = +$12/seat/mo \u2192 Total add-ons = +$18/seat/mo\n- **Base bundle at 1,000-seat tier:** $15 + $18 = $33/seat/mo (pre-multi-year discount)\n- **3-year discount:** 10% off \u2192 $33 \u00d7 0.90 = **$29.70/seat/month**\n- **Annual cost:** $29.70 \u00d7 2,500 seats \u00d7 12 months = **$891,000/year**\n\n---\n\n{\n  \"question_id\": \"S2\",\n  \"category\": \"pricing\",\n  \"answer\": \"For 2,500 endpoints on a full EPP+EDR+SIEM+MDR stack with a 3-year term, here is the expected cost build-up using Helios's published Q1 2025 pricing. The EPP+EDR bundle base rate at the 1,000-seat published tier is $15/seat/month; adding the SIEM add-on (+$6/seat/month) and MDR add-on (+$12/seat/month) brings the pre-discount all-in rate to $33/seat/month. Applying the 3-year multi-year discount of 10% yields an effective rate of $29.70/seat/month, translating to an annual contract value of approximately $891,000/year (2,500 \u00d7 $29.70 \u00d7 12). Note that 2,500 seats falls between the published 1,000-seat ($15/seat/mo) and 5,000-seat ($11/seat/mo) tiers, so a formal commercial quote may yield a more favorable interpolated volume rate \u2014 all figures above exclude professional services.\",\n  \"sources\": [\"Helios Commercial Pricing Sheet Q1 2025\"],\n  \"confidence\": \"medium\",\n  \"flags\": [\n    \"2,500-seat tier is not explicitly listed in the pricing sheet \u2014 base EPP+EDR rate was held at the 1,000-seat tier ($15/seat/mo); actual rate may be lower via interpolation between $15 and $11 \u2014 recommend a formal quote to confirm.\",\n    \"Professional services (onboarding, deployment, tuning) are excluded per the pricing sheet and should be scoped separately.\",\n    \"Volume discount percentage for 2,500 seats is not explicitly stated; human reviewer should confirm with sales whether an intermediate tier discount applies.\"\n  ]\n}",
+      "sources": [],
+      "confidence": "low",
+      "flags": [
+        "model output was not valid JSON"
+      ]
+    },
+    {
+      "question_id": "S3",
+      "category": "company-info",
+      "answer": "I now have all available KB information. Here is the structured answer:\n\n{\n  \"question_id\": \"S3\",\n  \"category\": \"company-info\",\n  \"answer\": \"We would put you in touch with two approved reference customers from our 15 asset management clients. First, Crestview Capital Partners \u2014 an asset management firm of comparable scale (850 endpoints) running our EPP+MDR stack since 2023, making them an especially current and relevant reference on day-to-day operations, onboarding experience, and managed detection workflows. Second, Meridian National Bank (3,200 endpoints, EPP+EDR+SIEM, live since 2022) offers a perspective on a more mature, larger-scale deployment within a heavily regulated financial-services environment, which mirrors the compliance rigour typical of Singapore-licensed asset managers. Both accounts have formally approved external reference conversations, and our financial-services vertical carries an average NPS of 72. Note: our KB does not currently confirm a Singapore- or APAC-domiciled reference customer; a human reviewer should verify whether any of our 15 asset management clients are APAC-based, as that would be a stronger geographic match.\",\n  \"sources\": [\"Helios Customer Success \u2014 Vertical Report 2024\"],\n  \"confidence\": \"medium\",\n  \"flags\": [\n    \"No confirmed Singapore- or APAC-based reference customer found in the knowledge base \u2014 verify internally before sending this response.\",\n    \"Crestview Capital Partners is described only as an asset management firm; confirm geographic footprint and AUM profile matches the prospect before making introduction.\",\n    \"Data residency / regulatory fit for Singapore (MAS TRM Guidelines) not addressed in retrieved sources \u2014 consider adding a compliance-specific reference if available.\"\n  ]\n}",
+      "sources": [],
+      "confidence": "low",
+      "flags": [
+        "model output was not valid JSON"
+      ]
+    },
+    {
+      "question_id": "S4",
+      "category": "technical",
+      "answer": "Based on available documentation, Helios Security's average NPS among financial services customers is 72, as reported in the Helios Customer Success Vertical Report 2024, which covers 47 financial services customers including banks, insurance carriers, asset management firms, and fintechs. However, the knowledge base does not contain a documented company-wide NPS figure or a formal description of the NPS measurement methodology (e.g., survey frequency, respondent segmentation, or third-party validation). A human reviewer should supply these details before submission.",
+      "sources": [
+        "Helios Customer Success \u2014 Vertical Report 2024"
+      ],
+      "confidence": "low",
+      "flags": [
+        "Only a vertical-specific NPS (financial services: 72) was found \u2014 no overall/company-wide NPS score is documented in the knowledge base.",
+        "NPS measurement methodology (survey cadence, platform used, respondent criteria, third-party audit status) is absent from the knowledge base and must be provided by the Customer Success or Operations team before this answer is submitted.",
+        "Confirm whether the financial services NPS of 72 is current for the RFP submission period."
+      ]
+    },
+    {
+      "question_id": "S5",
+      "category": "compliance",
+      "answer": "Helios retains raw security telemetry for a default period of 90 days per tenant, while aggregated alerts are retained for 13 months. Retention is fully configurable on a per-tenant basis, allowing customers to adjust the raw telemetry window to meet their specific regulatory or operational requirements. All retained data is protected with AES-256-GCM encryption at rest (supporting customer-managed keys via AWS KMS or BYOK) and TLS 1.3 in transit, ensuring that extended retention periods do not introduce additional security risk.",
+      "sources": [
+        "Helios Data Sovereignty & Privacy Whitepaper v3.1"
+      ],
+      "confidence": "high",
+      "flags": [
+        "The whitepaper confirms retention is 'configurable per tenant' but does not specify the minimum or maximum configurable range (e.g., floor/ceiling values). A human reviewer should confirm whether those limits exist and, if so, document them for the RFP response.",
+        "If the prospect has specific regulatory retention mandates (e.g., HIPAA 6-year requirement), confirm that the platform can be configured to satisfy those durations."
+      ]
+    }
+  ],
+  "review": {
+    "issues": [
+      {
+        "kind": "confidence",
+        "question_ids": [
+          "S1",
+          "S5"
+        ],
+        "summary": "S1 states the 90-day raw telemetry / 13-month alert retention figures with medium confidence and flags them as coming from a DPA context, while S5 asserts the exact same figures with high confidence citing the Data Sovereignty Whitepaper \u2014 the confidence level is inconsistent for the same factual claim.",
+        "recommended_fix": "Align both answers to 'medium' confidence (or whichever level is verified), since S5's 'high' confidence is undermined by the flag in that same answer acknowledging the configurable range is unconfirmed."
+      },
+      {
+        "kind": "tone",
+        "question_ids": [
+          "S2",
+          "S3"
+        ],
+        "summary": "S2 and S3 expose raw model reasoning text ('Step-by-step math:', 'I now have all available KB information') and embedded JSON artifacts in the customer-facing answer field, which is highly unprofessional compared to the clean prose answers in S1, S4, and S5.",
+        "recommended_fix": "Strip all internal chain-of-thought text and nested JSON from S2 and S3 before sending, leaving only the polished prose answer intended for the customer."
+      },
+      {
+        "kind": "confidence",
+        "question_ids": [
+          "S2",
+          "S3"
+        ],
+        "summary": "The outer envelope for S2 and S3 carries confidence 'low' with the flag 'model output was not valid JSON', yet the embedded answers inside those fields contain fully calculated figures and named customer references presented as factual \u2014 creating a mismatch between the stated low confidence and the assertive tone of the inner content.",
+        "recommended_fix": "Reconcile the outer confidence field with the inner answer: either elevate the outer confidence to match the inner answer's assertions (if verified) or add explicit hedging language to the inner answer text."
+      },
+      {
+        "kind": "source",
+        "question_ids": [
+          "S1",
+          "S5"
+        ],
+        "summary": "Both S1 and S5 cite 'Helios Data Sovereignty & Privacy Whitepaper v3.1' for overlapping retention claims, but S1 also lists three additional sources (including 'Helios Compliance & Certifications Register 2025') whereas S5 cites only the whitepaper \u2014 if the retention figures are sourced identically, the citation sets should be consistent.",
+        "recommended_fix": "Confirm whether the retention figures in S1 draw on the same single whitepaper source as S5, and if so, standardise the source citation for that specific claim across both answers."
+      },
+      {
+        "kind": "numerical",
+        "question_ids": [
+          "S3",
+          "S4"
+        ],
+        "summary": "S3 references '15 asset management clients' as the vertical count, while S4 cites '47 financial services customers' as the broader vertical \u2014 these figures are not directly contradictory but S3's answer never contextualises the 15 figure within the 47, risking customer confusion about the true scale of the financial-services base.",
+        "recommended_fix": "Add a clarifying sentence in S3 noting that the 15 asset management clients sit within Helios's broader 47-customer financial-services portfolio, so both figures are transparently reconciled."
+      }
+    ],
+    "overall_assessment": "The most critical issues are the raw model reasoning text leaking into the customer-facing answers for S2 and S3, which must be remediated before any submission. Beyond that, confidence-level inconsistencies on the retention figures and the mismatched citation sets for the same underlying data point require alignment to avoid undermining credibility."
+  },
+  "evals": {
+    "passed": 20,
+    "failed": 0,
+    "details": [
+      {
+        "q": "S1",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S1",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: medium"
+      },
+      {
+        "q": "S1",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=4 flags=3"
+      },
+      {
+        "q": "S1",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S2",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S2",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: low"
+      },
+      {
+        "q": "S2",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=0 flags=1"
+      },
+      {
+        "q": "S2",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S3",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S3",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: low"
+      },
+      {
+        "q": "S3",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=0 flags=1"
+      },
+      {
+        "q": "S3",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S4",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S4",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: low"
+      },
+      {
+        "q": "S4",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=3"
+      },
+      {
+        "q": "S4",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S5",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S5",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: high"
+      },
+      {
+        "q": "S5",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=2"
+      },
+      {
+        "q": "S5",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      }
+    ]
+  }
+}
