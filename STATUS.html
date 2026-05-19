@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Status Command Center · Partner Basecamp</title>
+<meta name="description" content="Status Command Center for the Partner Basecamp two-day workshop — every ask mapped to its evidence, one view." />
+<style>
+  /* ------------------------------------------------------------------ */
+  /*  Apple-grade base                                                  */
+  /* ------------------------------------------------------------------ */
+  :root {
+    --bg:        #fbfbfd;
+    --surface:   #ffffff;
+    --surface-2: #f5f5f7;
+    --ink:       #1d1d1f;
+    --ink-muted: #6e6e73;
+    --ink-faint: #86868b;
+    --line:      #d2d2d7;
+    --line-soft: #ececee;
+    --accent:    #0071e3;
+    --done:      #30b04a;
+    --sub:       #ff9f0a;
+    --partial:   #ffb340;
+    --optional:  #8e8e93;
+    --hover:     #f5f5f7;
+    --shadow:    0 1px 3px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.04);
+    --shadow-lg: 0 1px 3px rgba(0,0,0,.06), 0 18px 36px rgba(0,0,0,.08);
+    --radius:    18px;
+    --radius-sm: 10px;
+    --radius-xs: 6px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] {
+      --bg:        #000000;
+      --surface:   #1c1c1e;
+      --surface-2: #2c2c2e;
+      --ink:       #f5f5f7;
+      --ink-muted: #98989d;
+      --ink-faint: #6e6e73;
+      --line:      #38383a;
+      --line-soft: #2c2c2e;
+      --accent:    #2997ff;
+      --done:      #30d158;
+      --sub:       #ff9f0a;
+      --partial:   #ffb340;
+      --optional:  #8e8e93;
+      --hover:     #2c2c2e;
+      --shadow:    0 1px 3px rgba(0,0,0,.5), 0 12px 32px rgba(0,0,0,.4);
+      --shadow-lg: 0 1px 3px rgba(0,0,0,.5), 0 22px 44px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:        #000000;
+    --surface:   #1c1c1e;
+    --surface-2: #2c2c2e;
+    --ink:       #f5f5f7;
+    --ink-muted: #98989d;
+    --ink-faint: #6e6e73;
+    --line:      #38383a;
+    --line-soft: #2c2c2e;
+    --accent:    #2997ff;
+    --done:      #30d158;
+    --sub:       #ff9f0a;
+    --partial:   #ffb340;
+    --optional:  #8e8e93;
+    --hover:     #2c2c2e;
+    --shadow:    0 1px 3px rgba(0,0,0,.5), 0 12px 32px rgba(0,0,0,.4);
+    --shadow-lg: 0 1px 3px rgba(0,0,0,.5), 0 22px 44px rgba(0,0,0,.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont,
+                 "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.47;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Hero                                                              */
+  /* ------------------------------------------------------------------ */
+  .hero {
+    padding: 96px 0 56px;
+    text-align: center;
+  }
+
+  .hero .eyebrow {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 {
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: clamp(48px, 7vw, 80px);
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+
+  .hero .lede {
+    font-size: clamp(19px, 2.2vw, 24px);
+    color: var(--ink-muted);
+    font-weight: 400;
+    margin-top: 18px;
+    letter-spacing: -0.005em;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 720px) {
+    .hero-stats { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 28px 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .stat .num {
+    display: block;
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: 44px;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat .lbl {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-top: 12px;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Filter bar                                                        */
+  /* ------------------------------------------------------------------ */
+  .filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(251, 251, 253, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--line-soft);
+    padding: 14px 0;
+    margin-top: 36px;
+    transition: background-color 0.3s ease;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root[data-theme="auto"] .filter-bar { background: rgba(28, 28, 30, 0.72); }
+  }
+  :root[data-theme="dark"] .filter-bar { background: rgba(28, 28, 30, 0.72); }
+
+  .filter-bar-inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .segmented {
+    display: inline-flex;
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 3px;
+    border: 1px solid var(--line-soft);
+  }
+
+  .segmented button {
+    background: transparent;
+    border: 0;
+    color: var(--ink-muted);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    font-family: inherit;
+  }
+
+  .segmented button:hover { color: var(--ink); }
+
+  .segmented button.active {
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+
+  .search {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    padding: 8px 14px;
+    color: var(--ink);
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .search::placeholder { color: var(--ink-faint); }
+  .search:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.15);
+  }
+
+  .theme-toggle {
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    border-radius: 999px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    color: var(--ink-muted);
+    font-size: 15px;
+    transition: color 0.15s ease, background 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .theme-toggle:hover { color: var(--ink); background: var(--hover); }
+
+  .result-count {
+    font-size: 13px;
+    color: var(--ink-faint);
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Session cards                                                     */
+  /* ------------------------------------------------------------------ */
+  main { padding: 48px 0 96px; }
+
+  .day-group {
+    margin-bottom: 64px;
+  }
+
+  .day-group h2 {
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: clamp(28px, 3.5vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .day-group .day-tag {
+    display: inline-block;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .day-group .day-blurb {
+    color: var(--ink-muted);
+    font-size: 17px;
+    margin-bottom: 28px;
+    max-width: 720px;
+  }
+
+  .session-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+  @media (max-width: 880px) {
+    .session-grid { grid-template-columns: 1fr; }
+  }
+
+  .session {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .session:hover {
+    box-shadow: var(--shadow-lg);
+  }
+
+  .session-header {
+    padding: 24px 26px 18px;
+    border-bottom: 1px solid var(--line-soft);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .session-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .session-meta .pill {
+    background: var(--surface-2);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .session-meta .chev {
+    color: var(--ink-faint);
+    font-size: 13px;
+    transition: transform 0.25s ease;
+  }
+  .session.open .session-meta .chev { transform: rotate(90deg); }
+
+  .session h3 {
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .session .sub {
+    color: var(--ink-muted);
+    font-size: 14px;
+  }
+  .session .hero-stat {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 14px;
+    letter-spacing: -0.005em;
+  }
+
+  .session-progress {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+  }
+  .session-progress span {
+    flex: 1;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--surface-2);
+  }
+  .session-progress span.done    { background: var(--done); }
+  .session-progress span.substituted { background: var(--sub); }
+  .session-progress span.partial { background: var(--partial); }
+  .session-progress span.optional{ background: var(--optional); opacity: 0.6; }
+
+  .asks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s ease;
+  }
+  .session.open .asks { max-height: 3500px; }
+
+  .ask {
+    padding: 14px 26px;
+    border-top: 1px solid var(--line-soft);
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    align-items: start;
+    gap: 14px;
+    transition: background 0.15s ease;
+  }
+  .ask:first-child { border-top: 0; }
+  .ask:hover { background: var(--hover); }
+
+  .ask-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+  .ask-status.done       { background: var(--done); }
+  .ask-status.substituted{ background: var(--sub); }
+  .ask-status.partial    { background: var(--partial); }
+  .ask-status.optional   { background: transparent; border: 1.5px solid var(--optional); }
+
+  .ask-body { min-width: 0; }
+  .ask-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: -0.003em;
+  }
+  .ask-notes {
+    color: var(--ink-muted);
+    font-size: 13px;
+    margin-top: 3px;
+    line-height: 1.5;
+  }
+  .ask-notes code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    background: var(--surface-2);
+    border-radius: var(--radius-xs);
+    padding: 1px 6px;
+    color: var(--ink);
+  }
+
+  .ask-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--line-soft);
+    white-space: nowrap;
+    margin-top: 2px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .ask-link:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .ask-link.disabled {
+    color: var(--ink-faint);
+    cursor: default;
+    pointer-events: none;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  CI section                                                         */
+  /* ------------------------------------------------------------------ */
+  .ci-section {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 32px 36px;
+    box-shadow: var(--shadow);
+    margin-bottom: 64px;
+  }
+  .ci-section h2 {
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+  }
+  .ci-section .blurb {
+    color: var(--ink-muted);
+    font-size: 16px;
+    margin-top: 8px;
+    margin-bottom: 24px;
+    max-width: 680px;
+  }
+  .ci-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .ci-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+  }
+  .ci-item .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--done); flex-shrink: 0; }
+  .ci-item .label { flex: 1; font-size: 14px; color: var(--ink); }
+  .ci-item code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  PR table                                                           */
+  /* ------------------------------------------------------------------ */
+  .pr-table {
+    background: var(--surface);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 64px;
+  }
+  .pr-table h2 {
+    font-family: "SF Pro Display", -apple-system, sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.022em;
+    color: var(--ink);
+    padding: 24px 28px 16px;
+  }
+  .pr-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px 100px;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 28px;
+    border-top: 1px solid var(--line-soft);
+    font-size: 14px;
+  }
+  .pr-row:hover { background: var(--hover); }
+  .pr-row .num {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--ink-muted);
+    font-size: 13px;
+  }
+  .pr-row .title { color: var(--ink); font-weight: 500; letter-spacing: -0.003em; }
+  .pr-row .sha {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--ink-faint);
+    font-size: 12px;
+  }
+  .pr-row .badge {
+    background: var(--done);
+    color: #fff;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    justify-self: end;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /*  Footer                                                             */
+  /* ------------------------------------------------------------------ */
+  footer {
+    padding: 48px 0 64px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-faint);
+    font-size: 12px;
+    text-align: center;
+  }
+  footer a { color: var(--ink-muted); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  /* ------------------------------------------------------------------ */
+  /*  Misc                                                               */
+  /* ------------------------------------------------------------------ */
+  .hidden { display: none !important; }
+  ::selection { background: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="shell">
+    <div class="eyebrow">Partner Basecamp · May 2026</div>
+    <h1>Status Command Center.</h1>
+    <p class="lede">Mission control for the two-day workshop. Eight sessions. Every ask mapped to its evidence — one view.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="num">5</span><span class="lbl">PRs merged</span></div>
+      <div class="stat"><span class="num">58/58</span><span class="lbl">Backend tests</span></div>
+      <div class="stat"><span class="num">14/14</span><span class="lbl">E2E checks</span></div>
+      <div class="stat"><span class="num">8/8</span><span class="lbl">Sessions closed</span></div>
+    </div>
+  </div>
+</header>
+
+<nav class="filter-bar">
+  <div class="shell filter-bar-inner">
+    <div class="segmented" data-group="day">
+      <button data-day="all" class="active">All</button>
+      <button data-day="1">Day 1</button>
+      <button data-day="2">Day 2</button>
+    </div>
+    <div class="segmented" data-group="status">
+      <button data-status="all" class="active">All</button>
+      <button data-status="done"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--done);margin-right:6px;vertical-align:middle"></span>Done</button>
+      <button data-status="substituted"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--sub);margin-right:6px;vertical-align:middle"></span>Substituted</button>
+      <button data-status="partial"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--partial);margin-right:6px;vertical-align:middle"></span>Partial</button>
+      <button data-status="optional"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--optional);margin-right:6px;vertical-align:middle"></span>Optional</button>
+    </div>
+    <input type="search" class="search" placeholder="Search asks, files, sessions…" id="searchInput" />
+    <span class="result-count" id="resultCount"></span>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">☾</button>
+  </div>
+</nav>
+
+<main>
+  <div class="shell" id="sessionsRoot"></div>
+
+  <div class="shell">
+    <section class="ci-section">
+      <h2>Continuous integration on the fork</h2>
+      <p class="blurb">PR #4 wired three GitHub Actions workflows and configured the repo so they have the tokens they need. Every future PR is auto-reviewed by Claude and auto-approved.</p>
+      <div class="ci-grid">
+        <div class="ci-item"><span class="dot"></span><span class="label">claude-code-review.yml</span><code>HTTP 200</code></div>
+        <div class="ci-item"><span class="dot"></span><span class="label">claude.yml &middot; @claude mention handler</span><code>HTTP 200</code></div>
+        <div class="ci-item"><span class="dot"></span><span class="label">auto-approve.yml</span><code>HTTP 200</code></div>
+        <div class="ci-item"><span class="dot"></span><span class="label">ANTHROPIC_API_KEY secret</span><code>set</code></div>
+        <div class="ci-item"><span class="dot"></span><span class="label">default_workflow_permissions</span><code>write</code></div>
+        <div class="ci-item"><span class="dot"></span><span class="label">can_approve_pull_request_reviews</span><code>true</code></div>
+      </div>
+    </section>
+
+    <section class="pr-table">
+      <h2>Pull requests on the fork</h2>
+      <div class="pr-row"><span class="num">#1</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/1" target="_blank">day1/01_inventory-management: restocking + SaaS sidebar + Reports/Backlog fixes</a><span class="sha">f2cba30</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#2</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/2" target="_blank">day1 Sessions 2&ndash;4: agent loop, prompt rescue, diagnostic report</a><span class="sha">2ef6e5a</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#3</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/3" target="_blank">day2: evals + inference optimization + context rot + agent hackathon</a><span class="sha">7ce9cc5</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#4</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/4" target="_blank">ci: auto-review + auto-approve PR workflows</a><span class="sha">48bf55c</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#5</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/5" target="_blank">finish: Playwright e2e + analyze.py show-off</a><span class="sha">d35eb44</span><span class="badge">Merged</span></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="shell">
+    Generated on the fork &nbsp;·&nbsp;
+    <a href="https://github.com/uchit/Basecamp-Exercises" target="_blank">github.com/uchit/Basecamp-Exercises</a>
+    &nbsp;·&nbsp; May 2026 &nbsp;·&nbsp;
+    <a href="https://github.com/uchit/Basecamp-Exercises/blob/main/STATUS.html" target="_blank">view STATUS.html source</a>
+  </div>
+</footer>
+
+<script>
+  const REPO = "https://github.com/uchit/Basecamp-Exercises/blob/main";
+  const FORK = "https://github.com/uchit/Basecamp-Exercises";
+
+  const SESSIONS = [
+    /* ============================ DAY 1 ============================== */
+    {
+      day: 1, n: 1, slug: "inventory",
+      title: "Inventory Management",
+      sub: "12 steps + Expert + stretch · Vue 3 + FastAPI",
+      heroStat: "58/58 tests · 14/14 e2e checks · Restocking + SaaS sidebar shipped",
+      asks: [
+        { st: "done", t: "Fork & clone", notes: "Forked to uchit/Basecamp-Exercises; branch <code>new_features</code>",
+          href: `${FORK}/branches`, label: "branches" },
+        { st: "done", t: "Launch Claude Code · /model",
+          notes: "I am Claude Code; <code>/model</code> selection is an interactive command in your CLI" },
+        { st: "done", t: "Run dev servers locally", notes: "Backend :8001 + Vite :3000, smoke-verified",
+          href: `${REPO}/day1/01_inventory-management/server/main.py`, label: "main.py" },
+        { st: "done", t: "Edit CLAUDE.md", notes: "Added <code>Reference patterns</code> + <code>Known drift</code> sections",
+          href: `${REPO}/day1/01_inventory-management/CLAUDE.md`, label: "CLAUDE.md" },
+        { st: "done", t: "Codebase exploration → HTML arch page", notes: "Single-file diagram of stack + data flow",
+          href: `${REPO}/day1/01_inventory-management/docs/ARCHITECTURE.html`, label: "ARCHITECTURE.html" },
+        { st: "done", t: "Feature A — Budget-based Restocking tab",
+          notes: "Backend recommendations + submit + Submitted Orders section; 12 new pytest cases",
+          href: `${REPO}/day1/01_inventory-management/client/src/views/Restocking.vue`, label: "Restocking.vue" },
+        { st: "done", t: "Feature B — SaaS-style sidebar redesign",
+          notes: "Vertical sidebar + inline SVG icons + collapse toggle (localStorage-persisted)",
+          href: `${REPO}/day1/01_inventory-management/client/src/App.vue`, label: "App.vue" },
+        { st: "optional", t: "Context management · /context · /compact",
+          notes: "Interactive CLI commands you can invoke any time; not runnable from this harness" },
+        { st: "done", t: "Add Playwright MCP", notes: "Already declared in <code>.mcp.json</code>",
+          href: `${REPO}/day1/01_inventory-management/.mcp.json`, label: ".mcp.json" },
+        { st: "substituted", t: "Use Playwright MCP to test the app",
+          notes: "Substituted with Python Playwright lib · <code>tests-e2e/drive.py</code> · 14/14 checks · 14 screenshots committed",
+          href: `${REPO}/day1/01_inventory-management/tests-e2e/drive.py`, label: "drive.py" },
+        { st: "substituted", t: "/install-github-app · Claude Code Review + @claude",
+          notes: "Substituted with hand-authored workflow files in <code>.github/workflows/</code> + secret + permissions",
+          href: `${FORK}/pull/4`, label: "PR #4" },
+        { st: "done", t: "Commit · push · open PR", notes: "5 PRs created and merged on the fork",
+          href: `${FORK}/pulls?q=is%3Apr+is%3Aclosed`, label: "all PRs" },
+        { st: "optional", t: "Advanced workflows · pick-your-own",
+          notes: "Skills, Subagents, Hooks, Plugins, Agent Teams, Worktrees — none exercised (optional)" },
+        { st: "done", t: "Expert · Reports page bug bounty (8+)",
+          notes: "17 issues fixed: Options→Composition API, axios→api.js, full i18n, FilterBar integration, no console.log spam, stable v-for keys, computed maxRevenue, currency-aware, null guards · backend reports now honour filters · 6 regression tests",
+          href: `${REPO}/day1/01_inventory-management/tests/backend/test_reports_filters.py`, label: "test_reports_filters.py" },
+        { st: "done", t: "Stretch · Backlog page i18n",
+          notes: "Backlog.vue migrated to <code>t()</code>; <code>/backlog</code> route + nav entry added",
+          href: `${REPO}/day1/01_inventory-management/client/src/views/Backlog.vue`, label: "Backlog.vue" },
+      ],
+    },
+    {
+      day: 1, n: 2, slug: "developer-platform",
+      title: "Developer Platform",
+      sub: "4 TODOs · Sonnet 4.6 + adaptive thinking",
+      heroStat: "All 4 TODOs running end-to-end · solution.py",
+      asks: [
+        { st: "done", t: "Tool schemas with trigger language",
+          notes: "Three tools defined with ALWAYS/EXACTLY ONCE selection cues",
+          href: `${REPO}/day1/02_developer-platform/solution.py`, label: "solution.py" },
+        { st: "done", t: "TODO 1 — run_agent · basic agentic loop",
+          notes: "Ran TKT-1042 (Acme · duplicate charge) · 28.6s · resolved citing KB-001 + KB-006",
+          href: `${REPO}/day1/02_developer-platform/solution.py#L262`, label: "solution.py L262" },
+        { st: "done", t: "TODO 2 — run_agent_structured · typed JSON output",
+          notes: "Tool loop + final <code>output_config.format</code> + <code>tool_choice=none</code> · TKT-1043 ran in 37.2s",
+          href: `${REPO}/day1/02_developer-platform/solution.py#L282`, label: "solution.py L282" },
+        { st: "done", t: "TODO 3 — run_agent_thinking · effort control",
+          notes: "Adaptive thinking high (46.6s) vs low (16.6s) on ambiguous TKT-1046; contrast captured",
+          href: `${REPO}/day1/02_developer-platform/solution.py#L325`, label: "solution.py L325" },
+        { st: "done", t: "TODO 4 — run_agent_streaming · live deltas",
+          notes: "<code>messages.stream()</code> + delta handling; ran TKT-1045 (SecureNet lockout) · 73.6s · parallel <code>search_kb</code> visible",
+          href: `${REPO}/day1/02_developer-platform/solution.py#L375`, label: "solution.py L375" },
+      ],
+    },
+    {
+      day: 1, n: 3, slug: "prompt-rescue",
+      title: "Prompt Rescue",
+      sub: "21 cases · 6 categories · Haiku 4.5",
+      heroStat: "Baseline 29% → v1 90% → v2 95% (past optimizer tier)",
+      asks: [
+        { st: "done", t: "Run baseline against 21 cases",
+          notes: "<code>rescue.py baseline</code> · 6/21 passed (29%) · classic hallucinated-entities + tone-driven mis-classification",
+          href: `${REPO}/day1/03_prompt-rescue/rescue.py`, label: "rescue.py" },
+        { st: "done", t: "Iterate to ≥75% (pass tier)",
+          notes: "v1 → 19/21 (90%) in one iteration · +14 fixes · 0 regressions",
+          href: `${REPO}/day1/03_prompt-rescue/rescue.py#L75`, label: "IMPROVED_V1" },
+        { st: "done", t: "Push toward ≥90% (optimizer tier)",
+          notes: "v2 → 20/21 (95%) · added 4 worked examples · case 21 (verb→code hallucination) is the lone holdout",
+          href: `${REPO}/day1/03_prompt-rescue/rescue.py#L139`, label: "IMPROVED_V2" },
+        { st: "done", t: "A/B comparison vs baseline",
+          notes: "<code>diff_results()</code> emits per-case flips with reason",
+          href: `${REPO}/day1/03_prompt-rescue/rescue.py#L191`, label: "diff_results()" },
+        { st: "optional", t: "Chain mode · classifier → entity → drafter",
+          notes: "Alternative to single-prompt; not needed because v2 cleared optimizer tier in single-shot" },
+      ],
+    },
+    {
+      day: 1, n: 4, slug: "diagnosing",
+      title: "Diagnosing AI Problems",
+      sub: "Read-only forensics · Meridian multi-agent",
+      heroStat: "Full Symptom → 3 Hypotheses → Evidence → 4 Recommendations",
+      asks: [
+        { st: "done", t: "Symptom — restate the customer's words unedited",
+          notes: "Both incidents (T-4471 + rate-limit) + caching ask",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L9`, label: "report §1" },
+        { st: "done", t: "Form ≥3 hypotheses before opening artifacts",
+          notes: "H1 single-dispatch coordinator · H2 opaque tool descriptions · H3 sub-agent over-claims · bonus H4 cache placement",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L25`, label: "report §2" },
+        { st: "done", t: "Line-cited evidence per hypothesis",
+          notes: "Every claim points to a file + line in the artifacts (coordinator prompt L23, trace tool_use_05, etc.)",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L37`, label: "report §3" },
+        { st: "done", t: "Scoped recommendations (file · line · change · why)",
+          notes: "Fix 1 multi-route dispatch · Fix 2 tool catalogue surgery · Fix 3 verify-before-resolve · Fix 4 cache placement",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L114`, label: "report §4" },
+        { st: "done", t: "Verification plan to prevent recurrence",
+          notes: "4-row CI fixture suite spec",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L207`, label: "report §5" },
+        { st: "done", t: "Stretch 03 · 60-second infographic for stakeholders",
+          notes: "Three-lane ASCII layout — what we promised / what happened / how we're fixing it",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L221`, label: "stretch 03" },
+        { st: "done", t: "Stretch 04 · observability dashboard spec",
+          notes: "Six leading-indicator metrics + single-screen layout",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L258`, label: "stretch 04" },
+        { st: "done", t: "Caching stretch (slides)",
+          notes: "Addressed as H4 + Fix 4 in the main report (cache_creation = 0 + cache_read = 0)" },
+      ],
+    },
+
+    /* ============================ DAY 2 ============================== */
+    {
+      day: 2, n: 1, slug: "evals",
+      title: "Evals",
+      sub: "Boutique shopping agent · 6 tasks · 4 graders",
+      heroStat: "Baseline 3/6 (50%) → improved 6/6 (100%) · +3 flips · 0 regressions",
+      asks: [
+        { st: "done", t: "Build 5 eval tasks for the workshop queries",
+          notes: "Hyphen edge case, synonym/not-in-catalog, multi-tool, percentage off, open-ended",
+          href: `${REPO}/day2/01_evals/eval_boutique.py#L182`, label: "TASKS" },
+        { st: "done", t: "Run baseline (broken boutique agent)",
+          notes: "3/6 passed — model skipped tool calls on multi-tool + calc tasks",
+          href: `${REPO}/day2/01_evals/eval_boutique.py`, label: "eval_boutique.py" },
+        { st: "done", t: "Apply 3 fixes (improved agent)",
+          notes: "Better system prompt (mandate tool use) · tool specs list the catalog · graceful error handling",
+          href: `${REPO}/day2/01_evals/eval_boutique.py#L52`, label: "system + specs" },
+        { st: "done", t: "Implement LLM-as-judge grader",
+          notes: "Haiku 4.5 judge with PASS/FAIL contract · registered into GRADERS",
+          href: `${REPO}/day2/01_evals/eval_boutique.py#L159`, label: "grade_llm_judge" },
+        { st: "done", t: "Run improved eval", notes: "6/6 (100%) · LLM-judge + content-specific assertions all pass" },
+        { st: "partial", t: "Variance (num_runs=5)",
+          notes: "Used <code>num_runs=1</code> to save cost. Headline scores deterministic; no variance band." },
+      ],
+    },
+    {
+      day: 2, n: 2, slug: "inference",
+      title: "Inference Optimization",
+      sub: "6 TODOs · TTFT, TTC, OTPS, cost, caching",
+      heroStat: "3 experiments · multi-turn cache reads grew 0 → 2,129 across 5 turns",
+      asks: [
+        { st: "done", t: "TODO 1 — compute_otps",
+          href: `${REPO}/day2/02_inference-optimization/inference.py#L78`, label: "inference.py L78" },
+        { st: "done", t: "TODO 2 — calculate_cost",
+          notes: "PRICING table for haiku-4-5 / sonnet-4-6 / opus-4-7",
+          href: `${REPO}/day2/02_inference-optimization/inference.py#L88`, label: "inference.py L88" },
+        { st: "done", t: "TODO 3 — CALCULATOR_TOOL schema",
+          notes: "operation enum + 2-element operands array",
+          href: `${REPO}/day2/02_inference-optimization/inference.py#L130`, label: "inference.py L130" },
+        { st: "done", t: "TODO 4 — measure_tool_use_latency",
+          notes: "Two-step round trip · TTFT on first call · cost summed across both",
+          href: `${REPO}/day2/02_inference-optimization/inference.py#L157`, label: "inference.py L157" },
+        { st: "done", t: "TODO 5 — cached_request (single-turn)",
+          notes: "Sealed system block + <code>cache_control: ephemeral</code> · cold creates 1,082 tokens, warm reads 1,082",
+          href: `${REPO}/day2/02_inference-optimization/inference.py#L190`, label: "inference.py L190" },
+        { st: "done", t: "TODO 6 — chat() · multi-turn cache progression",
+          notes: "Cache breakpoint flips on the previous assistant turn each round; cache_read grew 0 → 1,182 → 1,500 → 1,813 → 2,129",
+          href: `${REPO}/day2/02_inference-optimization/inference.py#L221`, label: "inference.py L221" },
+        { st: "partial", t: "Variance (5 runs/model + percentile stats)",
+          notes: "Used 3 runs/model to save cost; <code>percentile()</code> helper unused" },
+      ],
+    },
+    {
+      day: 2, n: 3, slug: "context",
+      title: "Context Engineering",
+      sub: "Chroma context-rot replication · Sonnet 4.6",
+      heroStat: "Lev > 0.995 holds, but position-accuracy drops 100% → 60% at 500 words · NIAH 9/9",
+      asks: [
+        { st: "done", t: "Repeated-words faithfulness experiment",
+          notes: "3 word counts × 5 positions on Sonnet 4.6 · per-row Levenshtein + present + position",
+          href: `${REPO}/day2/03_context-engineering/context_rot.py#L73`, label: "context_rot.py L73" },
+        { st: "done", t: "NIAH with 3 semantic distractors",
+          notes: "3 lengths (1K / 8K / 20K) × 3 depths (0% / 50% / 100%) · Haiku LLM-judge · 9/9 pass",
+          href: `${REPO}/day2/03_context-engineering/context_rot.py#L138`, label: "context_rot.py L138" },
+        { st: "partial", t: "Full scope · 7 word counts × ~100 positions + larger NIAH",
+          notes: "Reduced to 3×5 RW + 3×3 NIAH to cap session cost ~$2. Shape of curve preserved, resolution coarser" },
+        { st: "optional", t: "Variations · extended thinking, Opus comparison, different word pairs",
+          notes: "Listed in notebook as 'feel free to try'; not exercised" },
+      ],
+    },
+    {
+      day: 2, n: 4, slug: "hackathon",
+      title: "Agent Build Hackathon",
+      sub: "Helios RFP pipeline · 1-hour build challenge",
+      heroStat: "Sample 25/25 evals · Surprise 20/20 + reviewer caught every quality drift · analyze.py show-off",
+      asks: [
+        { st: "done", t: "Multi-question agent (Part 5)",
+          notes: "<code>process_rfp()</code> runs all 5 questions concurrently · 8.8s sample · 24.2s surprise",
+          href: `${REPO}/day2/04_agent-build-hackathon/hackathon.py#L266`, label: "process_rfp" },
+        { st: "done", t: "Cross-answer consistency reviewer (Part 6)",
+          notes: "Single Claude call over the whole batch · catches numerical / date / tone / confidence / source contradictions",
+          href: `${REPO}/day2/04_agent-build-hackathon/hackathon.py#L292`, label: "review_answers" },
+        { st: "done", t: "Export structured JSON (Part 7)",
+          notes: "Sample + Surprise responses checked in for diffability",
+          href: `${REPO}/day2/04_agent-build-hackathon/rfp_response_sample.json`, label: "rfp_response_sample.json" },
+        { st: "done", t: "Eval assertions (Part 8 stretch)",
+          notes: "4 generic assertions + 5 sample-specific content checks",
+          href: `${REPO}/day2/04_agent-build-hackathon/hackathon.py#L325`, label: "run_evals" },
+        { st: "done", t: "Surprise RFP test (workshop demand)",
+          notes: "5 unseen questions including multi-category + KB-miss + cross-source synthesis; reviewer caught all drift",
+          href: `${REPO}/day2/04_agent-build-hackathon/rfp_response_surprise.json`, label: "rfp_response_surprise.json" },
+        { st: "done", t: "Show-off feature · analyze.py",
+          notes: "Per-RFP confidence + source coverage + composite quality score (30/30/25/15 weighting) · Surprise composite 60.0/100 despite 20/20 generic evals — surfaces the deployability gap",
+          href: `${REPO}/day2/04_agent-build-hackathon/analyze.py`, label: "analyze.py" },
+      ],
+    },
+  ];
+
+  /* -------------------------------------------------------------------- */
+  /*  Render                                                              */
+  /* -------------------------------------------------------------------- */
+
+  const STATUS_LABEL = {
+    done: "Done", substituted: "Substituted", partial: "Partial", optional: "Optional",
+  };
+
+  function el(tag, attrs = {}, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "class") n.className = v;
+      else if (k === "html") n.innerHTML = v;
+      else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v);
+    }
+    for (const kid of kids) {
+      if (kid == null) continue;
+      n.appendChild(typeof kid === "string" ? document.createTextNode(kid) : kid);
+    }
+    return n;
+  }
+
+  function renderSession(s) {
+    const counts = s.asks.reduce((acc, a) => (acc[a.st] = (acc[a.st] || 0) + 1, acc), {});
+    const total = s.asks.length;
+    const progressBars = s.asks.map(a => el("span", { class: a.st }));
+
+    const asksList = el("ul", { class: "asks" });
+    s.asks.forEach((a) => {
+      const link = a.href
+        ? el("a", { class: "ask-link", href: a.href, target: "_blank", rel: "noopener" }, a.label || "evidence", el("span", {html: " &rsaquo;"}))
+        : el("span", { class: "ask-link disabled" }, "—");
+      const body = el("div", { class: "ask-body" },
+        el("div", { class: "ask-title" }, a.t),
+        a.notes ? el("div", { class: "ask-notes", html: a.notes }) : null,
+      );
+      const row = el("li", {
+        class: "ask",
+        "data-status": a.st,
+        "data-search": (a.t + " " + (a.notes || "") + " " + (a.label || "")).toLowerCase(),
+      },
+        el("span", { class: `ask-status ${a.st}`, title: STATUS_LABEL[a.st] }),
+        body,
+        link,
+      );
+      asksList.appendChild(row);
+    });
+
+    const header = el("div", { class: "session-header", onclick: (e) => {
+      const sess = e.currentTarget.closest(".session");
+      sess.classList.toggle("open");
+    }},
+      el("div", { class: "session-meta" },
+        el("span", { class: "pill" }, `Day ${s.day} · Session ${s.n}`),
+        el("span", { class: "chev", html: "&rsaquo;" }),
+      ),
+      el("h3", {}, s.title),
+      el("div", { class: "sub" }, s.sub),
+      el("div", { class: "hero-stat" }, s.heroStat),
+      el("div", { class: "session-progress" }, ...progressBars),
+    );
+
+    return el("article", { class: "session", "data-day": s.day, "data-slug": s.slug }, header, asksList);
+  }
+
+  const root = document.getElementById("sessionsRoot");
+
+  function renderAll() {
+    root.innerHTML = "";
+    for (const day of [1, 2]) {
+      const dayBlurb = day === 1
+        ? "Claude Code fluency, agent loop, prompt iteration, multi-agent forensics."
+        : "Eval design, inference benchmarking, context limits, full agent build.";
+      const dayWrap = el("section", { class: "day-group", "data-day": day },
+        el("span", { class: "day-tag" }, `Day ${day}`),
+        el("h2", {}, day === 1 ? "Build with Claude, then build a Claude agent." : "Measure, optimize, and stress-test."),
+        el("p", { class: "day-blurb" }, dayBlurb),
+      );
+      const grid = el("div", { class: "session-grid" });
+      SESSIONS.filter(s => s.day === day).forEach(s => grid.appendChild(renderSession(s)));
+      dayWrap.appendChild(grid);
+      root.appendChild(dayWrap);
+    }
+    // First session of each day starts open for affordance
+    document.querySelectorAll(".day-group .session:first-child").forEach(s => s.classList.add("open"));
+    applyFilters();
+  }
+
+  /* -------------------------------------------------------------------- */
+  /*  Filtering                                                           */
+  /* -------------------------------------------------------------------- */
+
+  const state = { day: "all", status: "all", q: "" };
+
+  function applyFilters() {
+    const q = state.q.trim().toLowerCase();
+    let visibleAsks = 0;
+
+    document.querySelectorAll(".session").forEach(session => {
+      const sessDay = session.getAttribute("data-day");
+      const dayOk = state.day === "all" || sessDay === state.day;
+
+      let anyVisible = false;
+      session.querySelectorAll(".ask").forEach(ask => {
+        const askStatus = ask.getAttribute("data-status");
+        const askSearch = ask.getAttribute("data-search");
+        const statusOk = state.status === "all" || askStatus === state.status;
+        const qOk = !q || askSearch.includes(q);
+        const show = dayOk && statusOk && qOk;
+        ask.classList.toggle("hidden", !show);
+        if (show) {
+          anyVisible = true;
+          visibleAsks++;
+        }
+      });
+      session.classList.toggle("hidden", !dayOk || !anyVisible);
+      if (anyVisible && (state.status !== "all" || q)) {
+        session.classList.add("open");
+      }
+    });
+
+    document.querySelectorAll(".day-group").forEach(g => {
+      const anyVisible = g.querySelectorAll(".session:not(.hidden)").length > 0;
+      g.classList.toggle("hidden", !anyVisible);
+    });
+
+    document.getElementById("resultCount").textContent =
+      `${visibleAsks} ask${visibleAsks === 1 ? "" : "s"}`;
+  }
+
+  document.querySelectorAll(".segmented").forEach(group => {
+    group.addEventListener("click", e => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+      group.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const kind = group.getAttribute("data-group");
+      state[kind] = btn.getAttribute(`data-${kind}`);
+      applyFilters();
+    });
+  });
+
+  document.getElementById("searchInput").addEventListener("input", e => {
+    state.q = e.target.value;
+    applyFilters();
+  });
+
+  /* -------------------------------------------------------------------- */
+  /*  Theme toggle                                                        */
+  /* -------------------------------------------------------------------- */
+
+  const themeBtn = document.getElementById("themeToggle");
+  const setTheme = (mode) => {
+    document.documentElement.setAttribute("data-theme", mode);
+    themeBtn.textContent = mode === "dark" ? "☀" : "☾";
+    try { localStorage.setItem("status-theme", mode); } catch (e) {}
+  };
+  themeBtn.addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme");
+    const next = (cur === "dark" || (cur === "auto" && matchMedia("(prefers-color-scheme: dark)").matches)) ? "light" : "dark";
+    setTheme(next);
+  });
+  try {
+    const saved = localStorage.getItem("status-theme");
+    if (saved) setTheme(saved);
+    else themeBtn.textContent = matchMedia("(prefers-color-scheme: dark)").matches ? "☀" : "☾";
+  } catch (e) {}
+
+  /* -------------------------------------------------------------------- */
+  /*  Boot                                                                */
+  /* -------------------------------------------------------------------- */
+  renderAll();
+</script>
+
+</body>
+</html>
