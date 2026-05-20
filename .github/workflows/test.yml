@@ -1,0 +1,72 @@
+name: Test
+
+# Runs on every PR + every push to main. Blocks merges on red.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-tests:
+    name: Backend pytest (58 tests)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: day1/01_inventory-management
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Sync server deps
+        working-directory: day1/01_inventory-management/server
+        run: |
+          uv venv .venv --python 3.12
+          uv sync
+
+      - name: Run backend test suite
+        working-directory: day1/01_inventory-management/tests
+        run: uv run --project ../server pytest backend/ -v --tb=short
+
+  locale-parity:
+    name: Locale parity (en ↔ ja)
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Check locale key parity
+        run: node day1/01_inventory-management/scripts/check-locale-parity.mjs
+
+  python-syntax:
+    name: Python syntax check
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile every committed .py
+        run: |
+          find . -name "*.py" -not -path "*/.venv/*" -not -path "*/node_modules/*" \
+            -not -path "*/__pycache__/*" -print0 \
+          | xargs -0 python -m py_compile
