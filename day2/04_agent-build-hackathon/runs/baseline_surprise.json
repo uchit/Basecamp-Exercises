@@ -1,0 +1,242 @@
+{
+  "rfp_name": "SURPRISE RFP (unseen)",
+  "total_questions": 5,
+  "answers": [
+    {
+      "question_id": "S1",
+      "category": "technical + compliance",
+      "answer": "Detection: When a P1-level threat is identified for an EU customer, Helios Sentinel's multi-layered engine \u2014 combining signature-based matching, behavioral analysis, and ML-driven anomaly detection \u2014 raises an alert within 2.3 seconds for known signatures or within 18 seconds for behavioral anomalies. The SIEM correlation engine ingests endpoint telemetry (process events, file-system changes, network connections), cloud audit logs (AWS CloudTrail, Azure Activity Log, GCP Audit Log), network flow data (NetFlow v9/IPFIX), and email gateway events at up to 50,000 events per second per tenant; our top 100 detection rules carry a 99.7% true-positive rate, validated quarterly against MITRE ATT&CK. Data sovereignty: No customer data leaves the EU region during incident response. EU tenants are served exclusively from dedicated infrastructure in Frankfurt (AWS eu-central-1) and Dublin (AWS eu-west-1); all telemetry, alerts, and case artifacts remain within the selected region. All agent communications use TLS 1.3 with certificate pinning, and data at rest is protected by AES-256-GCM with customer-managed keys (AWS KMS or BYOK). DPA obligations: A GDPR-compliant Data Processing Agreement is included in every EU contract. As a data processor, Helios is obligated under that DPA to notify the customer (data controller) of any confirmed or suspected personal data breach without undue delay, supporting the controller's own 72-hour supervisory-authority reporting requirement under GDPR Article 33. Raw telemetry is retained for a configurable period (default 90 days) and aggregated alerts for 13 months, providing the audit trail required for breach documentation. NOTE FOR REVIEWER: The knowledge base does not contain a dedicated P1 incident-response runbook or SLA document specifying numeric response/escalation times (e.g., 15-minute page, 1-hour containment SLA). The DPA breach-notification timeline cited above is inferred from GDPR Article 33 obligations referenced in the DPA inclusion statement \u2014 specific contractual timelines in the Helios DPA itself should be verified and added before submission.",
+      "sources": [
+        "Helios Platform Architecture Doc v4.2",
+        "Acme Corp RFP Response \u2014 March 2024",
+        "Helios Data Sovereignty & Privacy Whitepaper v3.1",
+        "Helios Compliance & Certifications Register 2025"
+      ],
+      "confidence": "medium",
+      "flags": [
+        "No P1-specific incident response runbook or SLA document found in KB \u2014 numeric escalation/response/containment SLAs (e.g., page time, acknowledgment window, containment target) must be sourced from the IR runbook or SLA schedule before submitting.",
+        "DPA breach-notification timeline (72-hour framing) is inferred from GDPR Art. 33 as referenced in the DPA inclusion statement, not from the DPA contractual text itself \u2014 legal/compliance team should confirm exact processor notification obligations and timelines stated in the Helios standard DPA.",
+        "Confirm whether Helios support engineers who may access EU tenant data during incident response are themselves EU-resident, or whether any cross-region access (e.g., US-based on-call staff) triggers a supplemental transfer mechanism under Chapter V GDPR."
+      ]
+    },
+    {
+      "question_id": "S2",
+      "category": "pricing",
+      "answer": "For 2,500 endpoints on a full EPP+EDR+SIEM+MDR stack, the blended per-seat base rate for EPP+EDR is approximately $13/seat/month (interpolated between the published 1,000-seat tier at $15 and the 5,000-seat tier at $11, per the Helios Commercial Pricing Sheet Q1 2025). Adding the SIEM (+$6/seat/month) and MDR (+$12/seat/month) add-ons brings the undiscounted bundle to ~$31/seat/month, or roughly $930,000/year. Applying the 10% multi-year discount for a 3-year commitment reduces the annual cost to approximately $837,000/year \u2014 an effective rate of ~$27.90/seat/month. Note: the 2,500-seat EPP+EDR tier is not explicitly listed in published brackets; a formal quote is required to confirm the exact volume-discount rate for this seat count, and all figures exclude professional services.",
+      "sources": [
+        "Helios Commercial Pricing Sheet Q1 2025"
+      ],
+      "confidence": "medium",
+      "flags": [
+        "2,500-seat tier is NOT an explicitly published bracket \u2014 EPP+EDR rate of ~$13/seat/month is interpolated between the 1,000-seat ($15) and 5,000-seat ($11) tiers; a formal quote must confirm the exact rate.",
+        "All figures exclude professional services, which may add to total contract value.",
+        "Confirm whether SIEM and MDR add-on rates are also subject to volume-tier adjustments at 2,500 seats \u2014 pricing sheet does not specify tiering for add-ons."
+      ]
+    },
+    {
+      "question_id": "S3",
+      "category": "company-info",
+      "answer": "We would propose two approved reference customers from our financial services portfolio of 47 clients, which includes 15 asset management firms. First, Crestview Capital Partners \u2014 an asset manager running 850 endpoints on our EPP+MDR stack since 2023 \u2014 is the closest profile match in terms of firm type and scale, and can speak directly to buy-side cybersecurity operations and managed detection & response. Second, Meridian National Bank \u2014 3,200 endpoints, EPP+EDR+SIEM, live since 2022 \u2014 offers a complementary perspective on regulated financial-sector deployments and our SIEM integration maturity. Both accounts are formally approved for external reference use, and our financial services vertical holds an average NPS of 72. We would make warm introductions upon request.",
+      "sources": [
+        "Helios Customer Success \u2014 Vertical Report 2024"
+      ],
+      "confidence": "medium",
+      "flags": [
+        "No Singapore-based or APAC-based reference customers were found in the knowledge base. A human reviewer should confirm whether any of the 15 asset management firm customers are headquartered in Singapore or the broader APAC region, which would be a stronger profile match for this prospect.",
+        "Crestview Capital Partners is the best available asset management reference, but no further firmographic detail (AUM size, geography, regulatory regime) was found in the KB \u2014 reviewer should validate fit before presenting to prospect.",
+        "If a Singapore or APAC reference is unavailable, consider noting this gap transparently in the RFP response and offering a call with the Helios APAC sales/solutions team instead."
+      ]
+    },
+    {
+      "question_id": "S4",
+      "category": "technical",
+      "answer": "Based on available documentation, Helios Security's average NPS score within the financial services vertical is 72, as reported in the Helios Customer Success Vertical Report 2024. This figure spans 47 financial services customers including banks, insurers, asset managers, and fintechs. However, a company-wide aggregate NPS figure and a detailed description of the survey methodology (e.g., survey frequency, tool used, and respondent pool definition) are not currently available in the knowledge base and should be confirmed with the Customer Success team before submission.",
+      "sources": [
+        "Helios Customer Success \u2014 Vertical Report 2024"
+      ],
+      "confidence": "medium",
+      "flags": [
+        "Only a vertical-specific NPS (financial services: 72) was found \u2014 no company-wide NPS score is documented in the KB. A human reviewer should obtain and add the overall NPS figure.",
+        "NPS measurement methodology (survey cadence, platform, respondent eligibility, calculation approach) is not documented in the KB \u2014 reviewer should source this from the Customer Success or CX team before finalizing the response."
+      ]
+    },
+    {
+      "question_id": "S5",
+      "category": "compliance",
+      "answer": "Helios retains raw security telemetry for a default period of 90 days per tenant, while aggregated alerts are retained for 13 months by default. Retention is fully configurable on a per-tenant basis, allowing customers to adjust these defaults to meet their own regulatory or operational requirements. All retained data is encrypted at rest using AES-256-GCM with support for customer-managed keys (AWS KMS or BYOK), ensuring both data security and customer control throughout the retention lifecycle.",
+      "sources": [
+        "Helios Data Sovereignty & Privacy Whitepaper v3.1"
+      ],
+      "confidence": "high",
+      "flags": [
+        "KB confirms retention is 'configurable per tenant' but does not specify the minimum or maximum configurable retention range \u2014 a human reviewer should confirm and document these bounds before submission.",
+        "KB does not specify whether retention configuration is self-service via UI/API or requires a support request \u2014 reviewer should clarify this for the customer."
+      ]
+    }
+  ],
+  "review": {
+    "issues": [
+      {
+        "kind": "confidence",
+        "question_ids": [
+          "S1",
+          "S5"
+        ],
+        "summary": "S1 states the 90-day raw telemetry / 13-month aggregated-alert retention figures with medium confidence and a reviewer caveat, while S5 states the identical figures with high confidence and no equivalent caveat about sourcing.",
+        "recommended_fix": "Align S5's confidence to 'medium' (matching S1) or add the same sourcing caveat present in S1, so both answers treat the retention figures with consistent certainty."
+      },
+      {
+        "kind": "numerical",
+        "question_ids": [
+          "S3",
+          "S4"
+        ],
+        "summary": "Both answers correctly cite 47 financial services customers and NPS 72, so the numbers are consistent, but S3 states '15 asset management firms' as a subset while S4 lists 'banks, insurers, asset managers, and fintechs' without the 15-firm sub-count \u2014 a minor omission that risks confusion if read together.",
+        "recommended_fix": "Add '15 asset management firms' to S4's description of the 47-customer cohort so both answers present the same level of detail about the portfolio composition."
+      }
+    ],
+    "overall_assessment": "The draft is largely internally consistent; the most significant issue is a confidence-level mismatch between S1 and S5 on the same retention figures (medium vs. high), which could undermine credibility if a reviewer notices the discrepancy. One minor detail-level inconsistency exists in how the 47-customer financial-services portfolio is described across S3 and S4."
+  },
+  "evals": {
+    "passed": 20,
+    "failed": 0,
+    "details": [
+      {
+        "q": "S1",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S1",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: medium"
+      },
+      {
+        "q": "S1",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=4 flags=3"
+      },
+      {
+        "q": "S1",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S2",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S2",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: medium"
+      },
+      {
+        "q": "S2",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=3"
+      },
+      {
+        "q": "S2",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S3",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S3",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: medium"
+      },
+      {
+        "q": "S3",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=3"
+      },
+      {
+        "q": "S3",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S4",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S4",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: medium"
+      },
+      {
+        "q": "S4",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=2"
+      },
+      {
+        "q": "S4",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S5",
+        "assertion": "has_answer_text",
+        "passed": true,
+        "note": ""
+      },
+      {
+        "q": "S5",
+        "assertion": "valid_confidence",
+        "passed": true,
+        "note": "got: high"
+      },
+      {
+        "q": "S5",
+        "assertion": "has_sources_or_flagged",
+        "passed": true,
+        "note": "sources=1 flags=2"
+      },
+      {
+        "q": "S5",
+        "assertion": "flags_is_list",
+        "passed": true,
+        "note": ""
+      }
+    ]
+  },
+  "composite": {
+    "source_coverage": 100.0,
+    "confidence_index": 68.0,
+    "grounding_rate": 0.0,
+    "reviewer_clean": 0.0,
+    "score": 50.4
+  },
+  "cost": {
+    "total_cost": 0,
+    "total_calls": 0,
+    "total_input_tokens": 0,
+    "total_output_tokens": 0,
+    "wall_clock_s": 0,
+    "by_stage": {}
+  },
+  "elapsed_s": 0
+}

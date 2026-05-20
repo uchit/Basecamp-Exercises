@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>A/B · Baseline vs Pro · SURPRISE RFP (unseen)</title>
+<style>
+:root { --bg:#fbfbfd;--surface:#fff;--surface-2:#f5f5f7;--ink:#1d1d1f;
+  --ink-muted:#6e6e73;--ink-faint:#86868b;--line-soft:#ececee;
+  --accent:#0071e3;--done:#30b04a;--warn:#ff9f0a;--bad:#ff453a;
+  --shadow:0 1px 3px rgba(0,0,0,.04),0 12px 28px rgba(0,0,0,.06);
+  --radius:18px; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#000;--surface:#1c1c1e;--surface-2:#2c2c2e;--ink:#f5f5f7;
+    --ink-muted:#98989d;--ink-faint:#6e6e73;--line-soft:#2c2c2e;
+    --accent:#2997ff; --shadow:0 1px 3px rgba(0,0,0,.5),0 18px 32px rgba(0,0,0,.45); }
+}
+* { margin:0;padding:0;box-sizing:border-box; }
+html,body { background:var(--bg);color:var(--ink); font: 16px/1.5 "SF Pro Text",-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif; -webkit-font-smoothing:antialiased; }
+.shell { max-width:1180px;margin:0 auto;padding:0 28px; }
+.hero { padding:72px 0 24px;text-align:center; }
+.hero h1 { font-family:"SF Pro Display",-apple-system,sans-serif; font-size:clamp(36px,5vw,56px); font-weight:600;letter-spacing:-0.025em;line-height:1.05; }
+.hero .sub { color:var(--ink-muted);font-size:20px;margin-top:14px; }
+.cards { display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px; }
+@media (max-width:760px){ .cards { grid-template-columns:1fr; } }
+.card { background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow);text-align:center; }
+.card .label { font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--ink-muted);font-weight:600;margin-bottom:8px; }
+.card.pro .label { color:var(--accent); }
+.card .name { font-size:18px;font-weight:600;letter-spacing:-0.01em;color:var(--ink);margin-bottom:14px; }
+.card .score {
+  font-family:"SF Pro Display",-apple-system,sans-serif;
+  font-size:88px;font-weight:600;letter-spacing:-0.04em;line-height:1; color:var(--done);
+  font-variant-numeric:tabular-nums;
+}
+.card .score.bad { color:var(--bad); }
+.card .score.warn { color:var(--warn); }
+.card .of { font-size:18px;color:var(--ink-muted);margin-top:6px; }
+.card .breakdown { margin-top:24px;font-size:13px;color:var(--ink-muted); }
+.delta-table { width:100%;border-collapse:collapse;margin-top:48px; background:var(--surface); border:1px solid var(--line-soft);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow); }
+.delta-table th,.delta-table td { padding:14px 18px;border-bottom:1px solid var(--line-soft); }
+.delta-table th { text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-muted);font-weight:600;background:var(--surface-2); }
+.delta-table td { font-size:14px; }
+.delta-table td.num { text-align:right;font-variant-numeric:tabular-nums; }
+.delta { font-weight:600; }
+.delta.up { color:var(--done); }
+.delta.down { color:var(--bad); }
+.delta.flat { color:var(--ink-muted); }
+footer { padding:48px 0 64px;text-align:center;color:var(--ink-faint);font-size:12px;border-top:1px solid var(--line-soft);margin-top:64px; }
+</style>
+</head><body>
+
+<header class="hero"><div class="shell">
+  <h1>Baseline vs Pro</h1>
+  <div class="sub">SURPRISE RFP (unseen) · same questions, same KB, same model</div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">Baseline (hackathon.py)</div>
+      <div class="name">keyword retrieval · text JSON · single review</div>
+      <div class="score bad">50.4</div>
+      <div class="of">/ 100</div>
+    </div>
+    <div class="card pro">
+      <div class="label">Pro (day2/04/pro)</div>
+      <div class="name">BM25 + rerank · structured output · critique + verify</div>
+      <div class="score bad">67.8</div>
+      <div class="of">/ 100</div>
+    </div>
+  </div>
+</div></header>
+
+<main class="shell">
+  <table class="delta-table">
+    <thead><tr><th>Quality metric</th><th class="num" style="text-align:right">Baseline</th><th class="num" style="text-align:right">Pro</th><th class="num" style="text-align:right">Δ</th></tr></thead>
+    <tbody><tr><td>Composite score</td><td class='num'>50.4</td><td class='num'>67.8</td><td class="num delta up">+17.4</td></tr>
+<tr><td>Source coverage</td><td class='num'>100.0%</td><td class='num'>100.0%</td><td class="num delta flat">0.0%</td></tr>
+<tr><td>Confidence index</td><td class='num'>68.0%</td><td class='num'>76.0%</td><td class="num delta up">+8.0%</td></tr>
+<tr><td>Grounding rate</td><td class='num'>0.0%</td><td class='num'>60.0%</td><td class="num delta up">+60.0%</td></tr>
+<tr><td>Reviewer clean</td><td class='num'>0.0%</td><td class='num'>0.0%</td><td class="num delta flat">0.0%</td></tr></tbody>
+  </table>
+
+  <table class="delta-table" style="margin-top:32px">
+    <thead><tr><th>Operational metric</th><th class="num" style="text-align:right">Baseline</th><th class="num" style="text-align:right">Pro</th><th class="num" style="text-align:right">Δ</th></tr></thead>
+    <tbody><tr><td>Total cost ($)</td><td class='num'>0</td><td class='num'>0.131495</td><td class='num delta flat'>—</td></tr>
+<tr><td>Total API calls</td><td class='num'>0</td><td class='num'>16</td><td class='num delta flat'>—</td></tr>
+<tr><td>Wall clock (s)</td><td class='num'>0</td><td class='num'>38.94</td><td class='num delta flat'>—</td></tr>
+<tr><td>Reviewer issues</td><td class='num'>2</td><td class='num'>7</td><td class='num delta flat'>—</td></tr></tbody>
+  </table>
+</main>
+
+<footer>Side-by-side comparison · open the per-RFP viewer for full drill-down</footer>
+</body></html>
