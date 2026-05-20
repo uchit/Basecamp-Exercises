@@ -1,0 +1,89 @@
+{
+  "comment": "v2 — adds escalate_to_human and a USE-WHEN hint on issue_refund.",
+  "tools": [
+    {
+      "name": "get_ticket",
+      "description": "Pull the full ticket record. Call this first.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "ticket_id": {"type": "string"} },
+        "required": ["ticket_id"]
+      }
+    },
+    {
+      "name": "lookup_customer_by_email",
+      "description": "Resolve submitter email to customer_id and basic info.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "email": {"type": "string"} },
+        "required": ["email"]
+      }
+    },
+    {
+      "name": "get_billing_history",
+      "description": "Last 12 months of invoices, payments, plan changes.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "customer_id": {"type": "string"} },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "check_plan_entitlements",
+      "description": "Plan features and limits for the customer's tier.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "customer_id": {"type": "string"} },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "issue_refund",
+      "description": "Issue a refund (calls Stripe). USE WHEN you have a verified overcharge with a transaction_id and amount ≤ $10,000. For amounts above $10K or anything requiring contract review, escalate_to_human instead.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {"type": "string"},
+          "amount": {"type": "number"},
+          "reason": {"type": "string", "enum": ["duplicate_charge", "billing_error", "service_credit", "goodwill"]}
+        },
+        "required": ["transaction_id", "amount", "reason"]
+      }
+    },
+    {
+      "name": "adjust_invoice",
+      "description": "Add a credit or correction to an open invoice.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "invoice_id": {"type": "string"},
+          "credit_amount": {"type": "number"},
+          "credit_description": {"type": "string"}
+        },
+        "required": ["invoice_id", "credit_amount", "credit_description"]
+      }
+    },
+    {
+      "name": "check_payment_method",
+      "description": "Card on file, status, last failure if any.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "customer_id": {"type": "string"} },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "description": "USE WHEN refund amount exceeds $10,000, OR you cannot identify the txn_id, OR ticket touches contract/legal terms, OR any action you cannot complete with the tools above.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "ticket_id": {"type": "string"},
+          "reason": {"type": "string", "enum": ["needs_code_change", "security", "customer_escalation", "agent_stuck"]},
+          "summary_for_human": {"type": "string"}
+        },
+        "required": ["ticket_id", "reason", "summary_for_human"]
+      }
+    }
+  ]
+}

@@ -167,6 +167,29 @@ Ticket: "billing dashboard wrong AND CSV export broken (200 affected on export, 
 => priority: P1 (payroll blocked = P1), affected_users: "200" (largest affected scope), response: bullet each issue."""
 
 
+# v3 tightens error_codes so verbs/behavioural language never get mis-extracted
+# as structured codes. The motivating failure: case 21 mentioned "time out"
+# (verb) and v2 emitted error_codes=["timeout"].
+IMPROVED_V3 = IMPROVED_V2 + """
+
+ERROR_CODES — STRUCTURAL RULE (overrides any ambiguity):
+
+A value qualifies as an error_code only if it matches one of these shapes:
+  - Uppercase identifier with dashes or underscores  (SVC-503-AUTH, VIZ-RENDER-408,
+    UPLOAD-TIMEOUT-413, SYNC_FAILED, NullPointerException, FEATURE_LOCKED)
+  - A bare HTTP status code as digits                (500, 401, 403, 429, 503)
+  - A quoted error message the ticket cites verbatim ("timeout exceeded",
+    "Internal Server Error", "Cannot read property X of undefined")
+
+It is NOT an error_code if it is:
+  - A verb phrase: "times out", "time out", "fails", "crashes", "freezes", "hangs"
+  - An adjective: "slow", "broken", "unreliable", "intermittent"
+  - A general behavioural description: "pages load slowly", "search returns wrong results"
+
+If the ticket only describes failure behaviour (no structured token + no quoted
+message), error_codes is []. Do NOT invent a code from a verb."""
+
+
 # ---------------------------------------------------------------------------
 # Driver
 # ---------------------------------------------------------------------------
@@ -214,18 +237,22 @@ def main() -> None:
     args = [a.lower() for a in sys.argv[1:]] or ["all"]
     print(f"Model: {_MODEL}   cases: {len(cases['cases'])}   categories: {list(cases['categories'])}")
 
-    run_baseline = "baseline" in args or "all" in args or "v1" in args or "v2" in args
-    run_v1 = "v1" in args or "all" in args or "v2" in args
-    run_v2 = "v2" in args or "all" in args
+    run_baseline = "baseline" in args or "all" in args or "v1" in args or "v2" in args or "v3" in args
+    run_v1 = "v1" in args or "all" in args or "v2" in args or "v3" in args
+    run_v2 = "v2" in args or "all" in args or "v3" in args
+    run_v3 = "v3" in args or "all" in args
 
     baseline = run(BASELINE_PROMPT, "Baseline (broken prompt)") if run_baseline else None
     v1 = run(IMPROVED_V1, "Iteration v1 (surgical fixes)") if run_v1 else None
     v2 = run(IMPROVED_V2, "Iteration v2 (v1 + worked examples)") if run_v2 else None
+    v3 = run(IMPROVED_V3, "Iteration v3 (v2 + structural error_codes rule)") if run_v3 else None
 
     if baseline and v1:
         diff_results(baseline, v1, "baseline", "v1")
     if v1 and v2:
         diff_results(v1, v2, "v1", "v2")
+    if v2 and v3:
+        diff_results(v2, v3, "v2", "v3")
 
 
 if __name__ == "__main__":

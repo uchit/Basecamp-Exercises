@@ -1,0 +1,106 @@
+{
+  "comment": "v2 — pruned from the original. Removed the 4 redundant customer-lookup tools, the 5 noise tools (helper, process, validate, tool_3_v2, get_data), and collapsed customer lookups into one canonical lookup_customer. fetch_customer_v2_databricks renamed to get_customer_metrics with USE-WHEN trigger language.",
+  "tools": [
+    {
+      "name": "get_ticket",
+      "description": "ALWAYS call this first to pull the full ticket record (submitter, subject, body, priority, created_at).",
+      "input_schema": {
+        "type": "object",
+        "properties": { "ticket_id": {"type": "string"} },
+        "required": ["ticket_id"]
+      }
+    },
+    {
+      "name": "lookup_customer",
+      "description": "Look up a customer by email or customer_id. Call once per ticket, right after get_ticket, to resolve the submitter. Returns customer_id, name, tier, tier_since, sso_provider, primary_contact, billing_contact, seats_used, seats_limit, mrr. This is the only customer lookup you need — do not call any other lookup tool.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "identifier": {"type": "string", "description": "Email or customer_id"} },
+        "required": ["identifier"]
+      }
+    },
+    {
+      "name": "check_plan_entitlements",
+      "description": "USE WHEN: ticket asks about plan features, seat caps, included usage, rate limits as defined by plan. Returns the customer's tier-level entitlements.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "customer_id": {"type": "string"} },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "check_system_status",
+      "description": "USE WHEN: ticket mentions a possible outage, says \"is your platform down\", or you suspect multiple customers are affected. Returns subsystem health.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "system": {"type": "string", "enum": ["api", "dashboard", "webhooks", "sso", "all"]}
+        },
+        "required": ["system"]
+      }
+    },
+    {
+      "name": "get_customer_metrics",
+      "description": "USE WHEN: a customer reports rate limiting, usage anomalies, intermittent errors, slow performance, retry storms, unexplained 429s/500s, or any complaint that requires looking at their actual traffic. Returns request volume, per-endpoint error rate, retry counts, and current-vs-plan-limit headroom over the last N days (default 7). DO NOT answer rate-limit questions from plan config alone — call this first.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "lookback_days": {"type": "integer", "default": 7, "minimum": 1, "maximum": 30}
+        },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "search_prior_tickets",
+      "description": "USE WHEN: the ticket is a follow-up to a previous case, or the customer references a past incident.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "query": {"type": "string"},
+          "limit": {"type": "integer", "default": 5}
+        },
+        "required": ["customer_id", "query"]
+      }
+    },
+    {
+      "name": "spawn_specialist",
+      "description": "Dispatch a specialist subagent for ONE category. If a ticket touches multiple categories, call this once per category — multiple specialists work in parallel.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "category": {"type": "string", "enum": ["billing", "technical", "account"]},
+          "ticket_id": {"type": "string"}
+        },
+        "required": ["category", "ticket_id"]
+      }
+    },
+    {
+      "name": "write_response",
+      "description": "Compose the final customer-facing response. Use only after every spawned specialist has returned. The response must address every issue raised in the ticket.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "ticket_id": {"type": "string"},
+          "response_body": {"type": "string"},
+          "resolution_status": {"type": "string", "enum": ["resolved", "escalated", "needs_info"]}
+        },
+        "required": ["ticket_id", "response_body", "resolution_status"]
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "description": "USE WHEN: any specialist reported it could not complete the work; OR the ticket involves legal/security/code-change intervention; OR you don't have a tool that fits and the answer requires human judgement.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "ticket_id": {"type": "string"},
+          "reason": {"type": "string", "enum": ["needs_code_change", "security", "customer_escalation", "agent_stuck"]},
+          "summary_for_human": {"type": "string"}
+        },
+        "required": ["ticket_id", "reason", "summary_for_human"]
+      }
+    }
+  ]
+}

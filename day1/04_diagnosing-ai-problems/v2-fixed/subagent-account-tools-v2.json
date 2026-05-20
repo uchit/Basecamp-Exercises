@@ -1,0 +1,105 @@
+{
+  "comment": "v2 — adds escalate_to_human (specialist previously could not escalate; only the coordinator had this tool).",
+  "tools": [
+    {
+      "name": "get_ticket",
+      "description": "Pull the full ticket record. Call this first.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "ticket_id": {"type": "string"} },
+        "required": ["ticket_id"]
+      }
+    },
+    {
+      "name": "lookup_customer_by_email",
+      "description": "Resolve submitter email to customer_id and basic info.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "email": {"type": "string"} },
+        "required": ["email"]
+      }
+    },
+    {
+      "name": "check_sso_config",
+      "description": "USE WHEN the ticket reports SSO/SAML failure. Returns IdP settings, certificate status, last successful auth, error state.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "customer_id": {"type": "string"} },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "check_audit_log",
+      "description": "USE WHEN you need to verify a recent workspace event (plan change, permission change, user removal). Filterable by event_type and after-date.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "event_type": {"type": "string"},
+          "after": {"type": "string"},
+          "limit": {"type": "integer"}
+        },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "get_workspace_account_summary",
+      "description": "Workspace summary: seats used/limit, admins, SSO status, created date.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "customer_id": {"type": "string"} },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "list_workspace_users",
+      "description": "List users with role and last-login. Optional role filter.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "role": {"type": "string", "enum": ["admin", "member", "viewer"]}
+        },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "modify_permissions",
+      "description": "Change a user's role. Requires admin confirmation for downgrades.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "user_email": {"type": "string"},
+          "new_role": {"type": "string", "enum": ["admin", "member", "viewer"]}
+        },
+        "required": ["customer_id", "user_email", "new_role"]
+      }
+    },
+    {
+      "name": "reset_2fa",
+      "description": "Clear a user's 2FA enrollment so they can re-enroll.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "user_email": {"type": "string"}
+        },
+        "required": ["customer_id", "user_email"]
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "description": "USE WHEN the requested action is outside your tools (e.g. session revocation, legal/compliance review, payment-related work, anything you cannot complete with the tools above). Hand off with a summary of what you verified + what is blocking + what action is needed.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "ticket_id": {"type": "string"},
+          "reason": {"type": "string", "enum": ["needs_code_change", "security", "customer_escalation", "agent_stuck"]},
+          "summary_for_human": {"type": "string"}
+        },
+        "required": ["ticket_id", "reason", "summary_for_human"]
+      }
+    }
+  ]
+}
