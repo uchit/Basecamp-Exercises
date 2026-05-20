@@ -116,8 +116,10 @@ export const api = {
     return response.data
   },
 
-  async submitRestockOrder(items) {
-    const response = await axios.post(`${API_BASE_URL}/orders/restock`, { items })
+  async submitRestockOrder(items, idempotencyKey) {
+    const body = { items }
+    if (idempotencyKey) body.idempotency_key = idempotencyKey
+    const response = await axios.post(`${API_BASE_URL}/orders/restock`, body)
     return response.data
   },
 

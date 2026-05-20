@@ -9,15 +9,17 @@
         </div>
       </div>
 
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" aria-label="Primary">
         <router-link
           v-for="item in navItems"
           :key="item.to"
           :to="item.to"
           :class="{ active: $route.path === item.to }"
           :title="t(item.labelKey)"
+          :aria-label="t(item.labelKey)"
+          :aria-current="$route.path === item.to ? 'page' : null"
         >
-          <span class="nav-icon" v-html="item.icon"></span>
+          <span class="nav-icon" aria-hidden="true" v-html="item.icon"></span>
           <span class="nav-label">{{ t(item.labelKey) }}</span>
         </router-link>
       </nav>

@@ -135,6 +135,11 @@ export default {
 
     const placeOrder = async () => {
       if (!canSubmit.value) return
+      // Fresh idempotency key per submit attempt. A retry layer (or accidental
+      // double-click) reuses the same key; the backend dedups by construction.
+      const idempotencyKey = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `restock-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
       try {
         submitting.value = true
         error.value = null
@@ -142,7 +147,7 @@ export default {
           sku: r.sku,
           quantity: r.recommended_quantity
         }))
-        lastOrder.value = await api.submitRestockOrder(items)
+        lastOrder.value = await api.submitRestockOrder(items, idempotencyKey)
         recommendations.value = []
       } catch (err) {
         error.value = 'Failed to place order: ' + (err.response?.data?.detail || err.message)
