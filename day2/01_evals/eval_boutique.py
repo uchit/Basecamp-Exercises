@@ -23,7 +23,20 @@ from anthropic import Anthropic
 from anthropic.types import TextBlock, ToolUseBlock
 
 MODEL = "claude-haiku-4-5"
-JUDGE_MODEL = "claude-haiku-4-5"
+# Judge runs on a stronger model than the agent to avoid same-model grader
+# bias (a Haiku grading Haiku output overestimates pass rate).
+JUDGE_MODEL = "claude-sonnet-4-6"
+
+# Pricing per million tokens (input / output) for the cost layer.
+PRICING = {
+    "claude-haiku-4-5":  {"input": 0.25, "output": 1.25},
+    "claude-sonnet-4-6": {"input": 3.00, "output": 15.00},
+    "claude-opus-4-7":   {"input": 15.00, "output": 75.00},
+}
+
+def cost_for(model: str, input_tokens: int, output_tokens: int) -> float:
+    p = PRICING.get(model, {"input": 3.00, "output": 15.00})
+    return input_tokens * p["input"] / 1_000_000 + output_tokens * p["output"] / 1_000_000
 
 client = Anthropic()
 
@@ -135,7 +148,7 @@ SYSTEM_PROMPT_GOOD = (
 # Agent: run_agent(query, *, tool_specs, system_prompt, tool_registry)
 # ----------------------------------------------------------------------------
 
-def run_agent(query, *, tool_specs, system_prompt, tool_registry, eval_mode=True, max_turns=10):
+def run_agent(query, *, tool_specs, system_prompt, tool_registry, eval_mode=True, max_turns=10, model=MODEL):
     messages = [{"role": "user", "content": query}]
     in_tokens = out_tokens = 0
     response = None
@@ -168,7 +181,11 @@ def run_agent(query, *, tool_specs, system_prompt, tool_registry, eval_mode=True
         messages.append({"role": "user", "content": tool_results})
 
     if eval_mode:
-        return {"messages": messages, "usage": {"input_tokens": in_tokens, "output_tokens": out_tokens}}
+        return {
+            "messages": messages,
+            "usage": {"input_tokens": in_tokens, "output_tokens": out_tokens},
+            "model": model,
+        }
     return "\n".join(b.text for b in response.content if isinstance(b, TextBlock))
 
 
@@ -351,17 +368,22 @@ def parse_transcript(messages):
     return {"final_text": final_text, "tool_calls": tool_calls}
 
 
-def run_task(task, *, tool_specs, system_prompt, tool_registry):
+def run_task(task, *, tool_specs, system_prompt, tool_registry, model=MODEL):
     t0 = time.time()
     try:
         raw = run_agent(task["query"], tool_specs=tool_specs, system_prompt=system_prompt,
-                        tool_registry=tool_registry)
+                        tool_registry=tool_registry, model=model)
     except Exception:
         return {"task_id": task["id"], "passed": False, "grades": [],
-                "error": traceback.format_exc()[:300], "elapsed": time.time() - t0}
+                "error": traceback.format_exc()[:300],
+                "elapsed": time.time() - t0, "cost": 0.0,
+                "input_tokens": 0, "output_tokens": 0}
 
     elapsed = time.time() - t0
     parsed = parse_transcript(raw["messages"])
+    usage = raw.get("usage", {})
+    in_tok = usage.get("input_tokens", 0)
+    out_tok = usage.get("output_tokens", 0)
     grades = []
     ctx = {"query": task["query"], "task_id": task["id"]}
     for grader in task["graders"]:
@@ -379,36 +401,80 @@ def run_task(task, *, tool_specs, system_prompt, tool_registry):
         "passed": passed,
         "grades": grades,
         "elapsed": round(elapsed, 2),
+        "input_tokens": in_tok,
+        "output_tokens": out_tok,
+        "cost": round(cost_for(model, in_tok, out_tok), 6),
         "tool_calls": [c["name"] for c in parsed["tool_calls"]],
         "final_text": parsed["final_text"],
     }
 
 
-def run_eval(label, *, tool_specs, system_prompt, tool_registry, parallel=4):
+def run_eval(label, *, tool_specs, system_prompt, tool_registry, parallel=4, num_runs=5, model=MODEL):
+    """Run every task `num_runs` times, aggregate, and report mean ± std + cost.
+
+    With num_runs=1 the legacy behaviour is preserved; with num_runs=5 (default)
+    every task gets a sample size large enough to compute variance — required
+    for any honest 'baseline vs improved' claim.
+    """
+    import statistics
     print(f"\n{'=' * 72}")
-    print(f"  {label}")
+    print(f"  {label}   ·   N={num_runs} runs/task   ·   judge={JUDGE_MODEL}")
     print(f"{'=' * 72}")
-    results = []
+
+    # Build the workload: each task × num_runs.
+    workload = [(t, run_idx) for t in TASKS for run_idx in range(num_runs)]
+    raw_results = []
     with ThreadPoolExecutor(max_workers=parallel) as pool:
         futures = {pool.submit(run_task, t, tool_specs=tool_specs, system_prompt=system_prompt,
-                               tool_registry=tool_registry): t for t in TASKS}
+                               tool_registry=tool_registry, model=model): (t, ri) for t, ri in workload}
         for fut in as_completed(futures):
-            results.append(fut.result())
-    order = {t["id"]: i for i, t in enumerate(TASKS)}
-    results.sort(key=lambda r: order[r["task_id"]])
+            raw_results.append(fut.result())
 
-    passed = sum(1 for r in results if r["passed"])
-    pct = round(100 * passed / len(results))
-    print(f"\n  Score: {passed}/{len(results)}  ({pct}%)\n")
-    for r in results:
-        mark = "PASS" if r["passed"] else "FAIL"
-        print(f"  [{mark}] {r['task_id']:<22} [{r['elapsed']:>4.1f}s, tools={','.join(r['tool_calls']) or '—'}]  {r['description']}")
-        for g in r["grades"]:
-            sign = "+" if g["score"] == 1.0 else "-"
-            print(f"        {sign} {g['type']:<18} {g['reason'][:120]}")
-        if r.get("error"):
-            print(f"        ! {r['error'][:200]}")
-    return results
+    # Group by task_id and aggregate.
+    by_task: dict[str, list[dict]] = {}
+    for r in raw_results:
+        by_task.setdefault(r["task_id"], []).append(r)
+
+    order = {t["id"]: i for i, t in enumerate(TASKS)}
+    aggregated = []
+    for tid in sorted(by_task, key=lambda x: order.get(x, 999)):
+        runs = by_task[tid]
+        passes = sum(1 for r in runs if r["passed"])
+        elapsed = [r["elapsed"] for r in runs]
+        agg = {
+            "task_id": tid,
+            "description": runs[0]["description"],
+            "passes_n": passes,
+            "total_n": len(runs),
+            "pass_rate": passes / len(runs),
+            "elapsed_mean": statistics.mean(elapsed),
+            "elapsed_stdev": statistics.stdev(elapsed) if len(elapsed) > 1 else 0.0,
+            "total_cost": sum(r["cost"] for r in runs),
+            "total_input_tokens": sum(r["input_tokens"] for r in runs),
+            "total_output_tokens": sum(r["output_tokens"] for r in runs),
+            "runs": runs,
+        }
+        aggregated.append(agg)
+
+    full_pass = sum(1 for a in aggregated if a["passes_n"] == a["total_n"])
+    flaky = sum(1 for a in aggregated if 0 < a["passes_n"] < a["total_n"])
+    always_fail = sum(1 for a in aggregated if a["passes_n"] == 0)
+    total_cost = sum(a["total_cost"] for a in aggregated)
+
+    print(f"\n  Tasks:       {len(aggregated)}")
+    print(f"  Always pass: {full_pass}")
+    print(f"  Flaky:       {flaky}  (pass on some runs, fail on others)")
+    print(f"  Always fail: {always_fail}")
+    print(f"  Total cost:  ${total_cost:.4f}  ({len(workload)} agent calls + {sum(1 for r in raw_results if any(g['type']=='llm_judge' for g in r['grades']))} judge calls)")
+    print()
+    for a in aggregated:
+        mark = "PASS" if a["passes_n"] == a["total_n"] else ("FLAKY" if a["passes_n"] > 0 else "FAIL")
+        bar = "█" * a["passes_n"] + "·" * (a["total_n"] - a["passes_n"])
+        print(f"  [{mark:>5}] {a['task_id']:<22} {bar}  {a['passes_n']}/{a['total_n']}  "
+              f"({a['elapsed_mean']:.1f}±{a['elapsed_stdev']:.1f}s, "
+              f"${a['total_cost']:.4f})  {a['description']}")
+
+    return aggregated
 
 
 def diff_results(a, b, label_a, label_b):
@@ -419,14 +485,20 @@ def diff_results(a, b, label_a, label_b):
     flips_up = flips_down = 0
     for rb in b:
         ra = by.get(rb["task_id"])
-        if not ra or ra["passed"] == rb["passed"]:
+        if not ra:
             continue
-        arrow = "↑" if rb["passed"] else "↓"
-        if rb["passed"]:
+        ra_rate = ra.get("pass_rate", 1.0 if ra.get("passed") else 0.0)
+        rb_rate = rb.get("pass_rate", 1.0 if rb.get("passed") else 0.0)
+        if ra_rate == rb_rate:
+            continue
+        arrow = "↑" if rb_rate > ra_rate else "↓"
+        if rb_rate > ra_rate:
             flips_up += 1
         else:
             flips_down += 1
-        print(f"  {arrow} {rb['task_id']:<22}  {ra['passed']!s:>5} → {rb['passed']!s:<5}  {rb['description']}")
+        ra_str = f"{ra.get('passes_n','?')}/{ra.get('total_n','?')}" if "passes_n" in ra else str(ra.get("passed"))
+        rb_str = f"{rb.get('passes_n','?')}/{rb.get('total_n','?')}" if "passes_n" in rb else str(rb.get("passed"))
+        print(f"  {arrow} {rb['task_id']:<22}  {ra_str:>7} → {rb_str:<7}  {rb['description']}")
     print(f"\n  Δ improvements: +{flips_up}   regressions: -{flips_down}")
 
 
@@ -435,7 +507,13 @@ def diff_results(a, b, label_a, label_b):
 # ----------------------------------------------------------------------------
 
 def main():
-    stage = sys.argv[1].lower() if len(sys.argv) > 1 else "all"
+    # CLI: `python eval_boutique.py [stage] [--n=5]`
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    stage = (args[0].lower() if args else "all")
+    num_runs = 5
+    for a in sys.argv[1:]:
+        if a.startswith("--n="):
+            num_runs = int(a.split("=", 1)[1])
 
     baseline = improved = None
 
@@ -445,6 +523,7 @@ def main():
             tool_specs=[GET_PRODUCT_SPEC_BAD, CALCULATE_SPEC_BAD],
             system_prompt=SYSTEM_PROMPT_BAD,
             tool_registry={"get_product": get_product_bad, "calculate": calculate},
+            num_runs=num_runs,
         )
 
     if stage in ("improved", "all"):
@@ -453,6 +532,7 @@ def main():
             tool_specs=[GET_PRODUCT_SPEC_GOOD, CALCULATE_SPEC_GOOD],
             system_prompt=SYSTEM_PROMPT_GOOD,
             tool_registry={"get_product": get_product_good, "calculate": calculate},
+            num_runs=num_runs,
         )
 
     if baseline and improved:
