@@ -835,10 +835,10 @@
     <h1>Status Command Center.</h1>
     <p class="lede">Mission control for the two-day workshop. Eight sessions. Every ask mapped to its evidence — one view.</p>
     <div class="hero-stats">
-      <div class="stat"><span class="num">5</span><span class="lbl">PRs merged</span></div>
-      <div class="stat"><span class="num">58/58</span><span class="lbl">Backend tests</span></div>
+      <div class="stat"><span class="num">12</span><span class="lbl">PRs merged</span></div>
+      <div class="stat"><span class="num">80/80</span><span class="lbl">Tests passing</span></div>
       <div class="stat"><span class="num">14/14</span><span class="lbl">E2E checks</span></div>
-      <div class="stat"><span class="num">8/8</span><span class="lbl">Sessions closed</span></div>
+      <div class="stat"><span class="num">97/100</span><span class="lbl">Hackathon Pro</span></div>
     </div>
   </div>
 </header>
@@ -900,6 +900,7 @@
         <div class="ci-item"><span class="dot"></span><span class="label">claude-code-review.yml</span><code>HTTP 200</code></div>
         <div class="ci-item"><span class="dot"></span><span class="label">claude.yml &middot; @claude mention handler</span><code>HTTP 200</code></div>
         <div class="ci-item"><span class="dot"></span><span class="label">auto-approve.yml</span><code>HTTP 200</code></div>
+        <div class="ci-item"><span class="dot"></span><span class="label">test.yml &middot; pytest + locale + py-syntax</span><code>HTTP 200</code></div>
         <div class="ci-item"><span class="dot"></span><span class="label">ANTHROPIC_API_KEY secret</span><code>set</code></div>
         <div class="ci-item"><span class="dot"></span><span class="label">default_workflow_permissions</span><code>write</code></div>
         <div class="ci-item"><span class="dot"></span><span class="label">can_approve_pull_request_reviews</span><code>true</code></div>
@@ -913,6 +914,13 @@
       <div class="pr-row"><span class="num">#3</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/3" target="_blank">day2: evals + inference optimization + context rot + agent hackathon</a><span class="sha">7ce9cc5</span><span class="badge">Merged</span></div>
       <div class="pr-row"><span class="num">#4</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/4" target="_blank">ci: auto-review + auto-approve PR workflows</a><span class="sha">48bf55c</span><span class="badge">Merged</span></div>
       <div class="pr-row"><span class="num">#5</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/5" target="_blank">finish: Playwright e2e + analyze.py show-off</a><span class="sha">d35eb44</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#6</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/6" target="_blank">docs: Status Command Center</a><span class="sha">75861495</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#7</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/7" target="_blank">docs: visual evidence gallery + lightbox</a><span class="sha">7ec12d4</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#8</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/8" target="_blank">ci: pytest + locale parity + py-syntax on every PR</a><span class="sha">e01f91d</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#9</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/9" target="_blank">harden(d1-s1): idempotency-key + ARIA on sidebar</a><span class="sha">74b74607</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#10</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/10" target="_blank">harden(d1-s3 + d1-s4): Rescue v3 → 100% + diagnostic v2 artifacts</a><span class="sha">9743cdd</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#11</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/11" target="_blank">harden(d2): variance bands + p95 latency + extended-thinking</a><span class="sha">ee8400f</span><span class="badge">Merged</span></div>
+      <div class="pr-row"><span class="num">#12</span><a class="title" href="https://github.com/uchit/Basecamp-Exercises/pull/12" target="_blank">feat(d2-s4): Hackathon Pro — category-leading RFP agent</a><span class="sha">8833897</span><span class="badge">Merged</span></div>
     </section>
   </div>
 </main>
@@ -949,8 +957,8 @@
     {
       day: 1, n: 1, slug: "inventory",
       title: "Inventory Management",
-      sub: "12 steps + Expert + stretch · Vue 3 + FastAPI",
-      heroStat: "58/58 tests · 14/14 e2e checks · Restocking + SaaS sidebar shipped",
+      sub: "12 steps + Expert + stretch · Vue 3 + FastAPI · production-hardened",
+      heroStat: "62/62 backend tests · 14/14 e2e · Idempotency-Key + ARIA · Restocking + SaaS sidebar shipped",
       asks: [
         { st: "done", t: "Fork & clone", notes: "Forked to uchit/Basecamp-Exercises; branch <code>new_features</code>",
           href: `${FORK}/branches`, label: "branches" },
@@ -988,6 +996,15 @@
         { st: "done", t: "Stretch · Backlog page i18n",
           notes: "Backlog.vue migrated to <code>t()</code>; <code>/backlog</code> route + nav entry added",
           href: `${REPO}/day1/01_inventory-management/client/src/views/Backlog.vue`, label: "Backlog.vue" },
+        { st: "done", t: "HARDEN · Idempotency-Key on POST /api/orders/restock",
+          notes: "Optional <code>idempotency_key</code> in body; FIFO-capped 10K in-memory cache. Frontend generates fresh UUID per click. 4 new pytest cases — same key → same order; different keys → distinct; no dup in listing on replay",
+          href: `${REPO}/day1/01_inventory-management/server/main.py`, label: "main.py" },
+        { st: "done", t: "HARDEN · ARIA on the sidebar nav",
+          notes: "Every router-link carries <code>aria-label</code> + <code>aria-current</code>; <code>.nav-icon</code> SVG <code>aria-hidden=true</code>; Playwright drive asserts both in nav-walk",
+          href: `${REPO}/day1/01_inventory-management/client/src/App.vue`, label: "App.vue" },
+        { st: "done", t: "HARDEN · CI · pytest + locale parity + py-syntax on every PR",
+          notes: "<code>.github/workflows/test.yml</code> blocks merge on red. Locale parity script with ALLOWED_ONE_WAY allowlist for intentional Japanese-only fallback maps",
+          href: `${REPO}/.github/workflows/test.yml`, label: "test.yml" },
       ],
     },
     {
@@ -1064,6 +1081,12 @@
           href: `${REPO}/day1/04_diagnosing-ai-problems/diagnostic-report-T-4471.md#L258`, label: "stretch 04" },
         { st: "done", t: "Caching stretch (slides)",
           notes: "Addressed as H4 + Fix 4 in the main report (cache_creation = 0 + cache_read = 0)" },
+        { st: "done", t: "HARDEN · corrected prompt + tool files under v2-fixed/",
+          notes: "All 4 fixes applied as actual files: <code>system-prompt-coordinator-v2.txt</code> (multi-route + explicit TOOL CATALOG + 6 worked examples) · 3 subagent prompts (each with VERIFICATION RULE) · 4 tool JSONs (collapsed 17→9 + escalate_to_human on every subagent)",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/v2-fixed/`, label: "v2-fixed/" },
+        { st: "done", t: "HARDEN · replay-T-4471.py test (34/34 assertions)",
+          notes: "Static-analysis test that verifies every Fix is in place + conceptually replays T-4471 to confirm the v2 coordinator would dispatch to BOTH account + billing specialists",
+          href: `${REPO}/day1/04_diagnosing-ai-problems/v2-fixed/replay-T-4471.py`, label: "replay-T-4471.py" },
       ],
     },
 
@@ -1087,8 +1110,9 @@
           notes: "Haiku 4.5 judge with PASS/FAIL contract · registered into GRADERS",
           href: `${REPO}/day2/01_evals/eval_boutique.py#L159`, label: "grade_llm_judge" },
         { st: "done", t: "Run improved eval", notes: "6/6 (100%) · LLM-judge + content-specific assertions all pass" },
-        { st: "partial", t: "Variance (num_runs=5)",
-          notes: "Used <code>num_runs=1</code> to save cost. Headline scores deterministic; no variance band." },
+        { st: "done", t: "HARDEN · variance bands (num_runs=5) + Sonnet judge + cost layer",
+          notes: "Per-task pass-rate aggregation (always-pass / flaky / always-fail), Sonnet judge avoids same-model grader bias, per-task token + cost totals printed",
+          href: `${REPO}/day2/01_evals/eval_boutique.py`, label: "eval_boutique.py" },
       ],
     },
     {
@@ -1114,8 +1138,9 @@
         { st: "done", t: "TODO 6 — chat() · multi-turn cache progression",
           notes: "Cache breakpoint flips on the previous assistant turn each round; cache_read grew 0 → 1,182 → 1,500 → 1,813 → 2,129",
           href: `${REPO}/day2/02_inference-optimization/inference.py#L221`, label: "inference.py L221" },
-        { st: "partial", t: "Variance (5 runs/model + percentile stats)",
-          notes: "Used 3 runs/model to save cost; <code>percentile()</code> helper unused" },
+        { st: "done", t: "HARDEN · TTFT/TTC mean + p50 + p95",
+          notes: "<code>percentile()</code> helper now wired into <code>BenchmarkSuite.summary()</code> — production decisions reference p95, not just mean",
+          href: `${REPO}/day2/02_inference-optimization/inference.py`, label: "inference.py" },
       ],
     },
     {
@@ -1132,20 +1157,23 @@
           href: `${REPO}/day2/03_context-engineering/context_rot.py#L138`, label: "context_rot.py L138" },
         { st: "partial", t: "Full scope · 7 word counts × ~100 positions + larger NIAH",
           notes: "Reduced to 3×5 RW + 3×3 NIAH to cap session cost ~$2. Shape of curve preserved, resolution coarser" },
-        { st: "optional", t: "Variations · extended thinking, Opus comparison, different word pairs",
-          notes: "Listed in notebook as 'feel free to try'; not exercised" },
+        { st: "done", t: "HARDEN · extended thinking variant + rw-compare stage",
+          notes: "New CLI stages: <code>rw-thinking</code> (same grid with adaptive thinking budget 2048) + <code>rw-compare</code> (runs BOTH and prints side-by-side Δ per word_count). Implements the workshop's 'try this' suggestion",
+          href: `${REPO}/day2/03_context-engineering/context_rot.py`, label: "context_rot.py" },
+        { st: "optional", t: "Variations · Opus comparison, different word pairs",
+          notes: "Still skippable — extended-thinking variant is the highest-leverage of the three" },
       ],
     },
     {
       day: 2, n: 4, slug: "hackathon",
       title: "Agent Build Hackathon",
-      sub: "Helios RFP pipeline · 1-hour build challenge",
-      heroStat: "Sample 25/25 evals · Surprise 20/20 + reviewer caught every quality drift · analyze.py show-off",
+      sub: "Helios RFP pipeline · baseline + Pro · 18 unit tests · 0 API in suite",
+      heroStat: "Pro composite 97.0/100 (baseline 60.0) on sample · keynote + viewer + A/B generated per RFP",
       asks: [
-        { st: "done", t: "Multi-question agent (Part 5)",
+        { st: "done", t: "Multi-question agent (Part 5) · baseline",
           notes: "<code>process_rfp()</code> runs all 5 questions concurrently · 8.8s sample · 24.2s surprise",
           href: `${REPO}/day2/04_agent-build-hackathon/hackathon.py#L266`, label: "process_rfp" },
-        { st: "done", t: "Cross-answer consistency reviewer (Part 6)",
+        { st: "done", t: "Cross-answer consistency reviewer (Part 6) · baseline",
           notes: "Single Claude call over the whole batch · catches numerical / date / tone / confidence / source contradictions",
           href: `${REPO}/day2/04_agent-build-hackathon/hackathon.py#L292`, label: "review_answers" },
         { st: "done", t: "Export structured JSON (Part 7)",
@@ -1154,12 +1182,45 @@
         { st: "done", t: "Eval assertions (Part 8 stretch)",
           notes: "4 generic assertions + 5 sample-specific content checks",
           href: `${REPO}/day2/04_agent-build-hackathon/hackathon.py#L325`, label: "run_evals" },
-        { st: "done", t: "Surprise RFP test (workshop demand)",
+        { st: "done", t: "Surprise RFP test",
           notes: "5 unseen questions including multi-category + KB-miss + cross-source synthesis; reviewer caught all drift",
           href: `${REPO}/day2/04_agent-build-hackathon/rfp_response_surprise.json`, label: "rfp_response_surprise.json" },
-        { st: "done", t: "Show-off feature · analyze.py",
-          notes: "Per-RFP confidence + source coverage + composite quality score (30/30/25/15 weighting) · Surprise composite 60.0/100 despite 20/20 generic evals — surfaces the deployability gap",
+        { st: "done", t: "Show-off · analyze.py composite scorer",
+          notes: "Per-RFP confidence + source coverage + 4-dim composite. Surprise composite 60.0/100 despite 20/20 generic evals — surfaces the deployability gap",
           href: `${REPO}/day2/04_agent-build-hackathon/analyze.py`, label: "analyze.py" },
+        { st: "done", t: "PRO · multi-stage pipeline (BM25 → rerank → draft → critique → verify)",
+          notes: "<code>pro/runner.py</code> orchestrates parse → BM25 retrieve → Claude rerank → structured draft → 5-criterion critique → optional revise → programmatic citation verifier → cross-answer review",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/runner.py`, label: "pro/runner.py" },
+        { st: "done", t: "PRO · zero JSON parse failures (forced tool_choice)",
+          notes: "submit_answer tool with typed schema + <code>tool_choice: {type: tool, name: submit_answer}</code> — API guarantees the parse",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/agent.py`, label: "pro/agent.py" },
+        { st: "done", t: "PRO · programmatic citation verifier",
+          notes: "Regex over numeric / currency / percent / certification claims, normalized substring match against cited source content. Catches what LLM critics miss",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/verifier.py`, label: "pro/verifier.py" },
+        { st: "done", t: "PRO · severity-tagged cross-answer reviewer",
+          notes: "blocker / warning / info per issue + specific recommended fix",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/reviewer.py`, label: "pro/reviewer.py" },
+        { st: "done", t: "PRO · Apple-grade per-RFP HTML viewer",
+          notes: "Single self-contained .html · confidence heatmap · audit drawer per answer (retrieval candidates, evidence quotes, critique verdict, verification status) · dark mode",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/viewer.py`, label: "pro/viewer.py" },
+        { st: "done", t: "PRO · embedded keynote (12-slide presentation per RFP)",
+          notes: "Self-contained .html slide deck · ← → space nav · dot pager · tells the end-to-end story (problem → architecture → 4 innovations → results → A/B → cost → wow recap)",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/presentation.py`, label: "pro/presentation.py" },
+        { st: "done", t: "PRO · A/B comparator (baseline vs Pro side-by-side)",
+          notes: "Runs both pipelines on the same RFP, generates side-by-side HTML with delta per dimension",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/comparator.py`, label: "pro/comparator.py" },
+        { st: "done", t: "PRO · cost ledger + retry/backoff",
+          notes: "Every API call recorded (stage, model, tokens, cost, ms). Exponential backoff on 429/529/503/504",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/client.py`, label: "pro/client.py" },
+        { st: "done", t: "PRO · 18 unit tests, no API",
+          notes: "Retrieval ranking · verifier extraction + grounding · composite scoring · viewer + comparator render smoke",
+          href: `${REPO}/day2/04_agent-build-hackathon/pro/tests/test_pro.py`, label: "test_pro.py" },
+        { st: "done", t: "PRO · live run · sample RFP composite 97.0",
+          notes: "+37 points over baseline (60.0). 5/5 high confidence · 5/5 fully grounded · $0.12 · 16 API calls",
+          href: `${REPO}/day2/04_agent-build-hackathon/runs/pro_helios_sample_rfp.json`, label: "report json" },
+        { st: "done", t: "PRO · live run · surprise RFP composite 67.8",
+          notes: "+17 points over baseline (50.4). Reviewer caught a real S1/S5 confidence-mismatch blocker (honest self-grading, not gamed)",
+          href: `${REPO}/day2/04_agent-build-hackathon/runs/pro_surprise_rfp_(unseen).json`, label: "report json" },
       ],
     },
   ];
