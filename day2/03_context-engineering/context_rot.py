@@ -36,11 +36,15 @@ client = anthropic.Anthropic(timeout=300.0)
 
 
 def call_model(prompt: str, model: str = MODEL, max_tokens: int = 1000,
-               system: str | None = None) -> str:
+               system: str | None = None, thinking: dict | None = None) -> str:
     kwargs = {"model": model, "max_tokens": max_tokens,
               "messages": [{"role": "user", "content": prompt}]}
     if system:
         kwargs["system"] = system
+    if thinking:
+        kwargs["thinking"] = thinking
+        # When extended thinking is on, max_tokens must include thinking budget.
+        kwargs["max_tokens"] = max(max_tokens, thinking.get("budget_tokens", 0) + max_tokens)
     resp = client.messages.create(**kwargs)
     for b in resp.content:
         if b.type == "text":
@@ -48,12 +52,14 @@ def call_model(prompt: str, model: str = MODEL, max_tokens: int = 1000,
     return ""
 
 
-def call_batch(prompts: list[dict], model: str = MODEL, max_concurrent: int = 8) -> list[str]:
+def call_batch(prompts: list[dict], model: str = MODEL, max_concurrent: int = 8,
+               thinking: dict | None = None) -> list[str]:
     results: list[str | None] = [None] * len(prompts)
 
     def _call(idx, item):
         out = call_model(item["prompt"], model=model,
-                         max_tokens=item.get("max_tokens", 1000))
+                         max_tokens=item.get("max_tokens", 1000),
+                         thinking=thinking)
         return idx, out
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_concurrent) as ex:
@@ -134,16 +140,7 @@ def correct_position(row: dict, output: str) -> bool:
         return False
 
 
-def run_repeated_words() -> None:
-    print()
-    print("=" * 72)
-    print("  A · Repeated-Words Faithfulness — Claude Sonnet 4.6")
-    print("=" * 72)
-    prompts = generate_rw_prompts()
-    print(f"\n  {len(prompts)} prompts across word counts {RW_WORD_COUNTS}.")
-    outputs = call_batch(prompts, model=MODEL, max_concurrent=5)
-
-    # Score per row
+def _score_rw_pass(prompts, outputs):
     per_count: dict[int, list[dict]] = {}
     for row, out in zip(prompts, outputs):
         scored = {
@@ -153,23 +150,73 @@ def run_repeated_words() -> None:
             "position_ok": correct_position(row, out),
         }
         per_count.setdefault(row["num_words"], []).append(scored)
+    return per_count
 
-    print(f"\n  {'word_count':>10} {'n':>3} {'Lev':>6} {'mod_present':>12} {'position_ok':>12}")
+
+def _summarize_rw(per_count: dict, label: str) -> dict:
+    print(f"\n  {label}")
+    print(f"  {'word_count':>10} {'n':>3} {'Lev':>6} {'mod_present':>12} {'position_ok':>12}")
     print(f"  {'-'*10} {'-'*3} {'-'*6} {'-'*12} {'-'*12}")
+    totals = {"lev": 0.0, "present": 0, "position_ok": 0, "n": 0}
+    summary_by_count = {}
     for n in sorted(per_count):
         rs = per_count[n]
         lev = sum(r["lev"] for r in rs) / len(rs)
         pres = sum(r["present"] for r in rs) / len(rs)
         pos = sum(r["position_ok"] for r in rs) / len(rs)
+        summary_by_count[n] = {"lev": lev, "present": pres, "position_ok": pos, "n": len(rs)}
         print(f"  {n:>10} {len(rs):>3} {lev:>6.3f} {pres*100:>11.0f}% {pos*100:>11.0f}%")
+        totals["lev"] += sum(r["lev"] for r in rs)
+        totals["present"] += sum(r["present"] for r in rs)
+        totals["position_ok"] += sum(r["position_ok"] for r in rs)
+        totals["n"] += len(rs)
+    overall_lev = totals["lev"] / totals["n"]
+    overall_pres = totals["present"] / totals["n"]
+    overall_pos = totals["position_ok"] / totals["n"]
+    print(f"\n  Overall ({totals['n']} prompts):  Lev={overall_lev:.4f}  "
+          f"mod_present={overall_pres*100:.1f}%  position_ok={overall_pos*100:.1f}%")
+    return {"by_count": summary_by_count, "lev": overall_lev,
+            "present": overall_pres, "position_ok": overall_pos, "n": totals["n"]}
 
-    all_rs = [r for rs in per_count.values() for r in rs]
-    n = len(all_rs)
+
+def run_repeated_words(with_thinking: bool = False, compare_thinking: bool = False) -> None:
     print()
-    print(f"  Overall ({n} prompts):")
-    print(f"    avg Levenshtein:        {sum(r['lev'] for r in all_rs)/n:.4f}")
-    print(f"    modified-word-present:  {sum(r['present'] for r in all_rs)/n*100:.1f}%")
-    print(f"    position accuracy:      {sum(r['position_ok'] for r in all_rs)/n*100:.1f}%")
+    print("=" * 72)
+    print("  A · Repeated-Words Faithfulness — Claude Sonnet 4.6")
+    print("=" * 72)
+    prompts = generate_rw_prompts()
+    print(f"\n  {len(prompts)} prompts across word counts {RW_WORD_COUNTS}.")
+
+    if compare_thinking:
+        # Run both: baseline + extended-thinking, then diff the per-count
+        # metrics so the rot/anti-rot effect is visible side-by-side.
+        print("\n  --- baseline (no thinking) ---")
+        out_base = call_batch(prompts, model=MODEL, max_concurrent=5)
+        per_base = _score_rw_pass(prompts, out_base)
+        s_base = _summarize_rw(per_base, "Baseline:")
+
+        print("\n  --- with extended thinking (budget_tokens=2048) ---")
+        out_think = call_batch(prompts, model=MODEL, max_concurrent=5,
+                                thinking={"type": "enabled", "budget_tokens": 2048})
+        per_think = _score_rw_pass(prompts, out_think)
+        s_think = _summarize_rw(per_think, "With extended thinking:")
+
+        print(f"\n  Δ thinking vs baseline")
+        print(f"  {'word_count':>10}  {'Δ Lev':>7}  {'Δ mod_present':>14}  {'Δ position_ok':>14}")
+        print(f"  {'-'*10}  {'-'*7}  {'-'*14}  {'-'*14}")
+        for n in sorted(per_base):
+            b = s_base["by_count"][n]
+            t = s_think["by_count"][n]
+            print(f"  {n:>10}  {(t['lev']-b['lev'])*100:>+6.2f}p  "
+                  f"{(t['present']-b['present'])*100:>+13.1f}p  "
+                  f"{(t['position_ok']-b['position_ok'])*100:>+13.1f}p")
+        return
+
+    thinking = {"type": "enabled", "budget_tokens": 2048} if with_thinking else None
+    label_suffix = " (with extended thinking)" if with_thinking else ""
+    outputs = call_batch(prompts, model=MODEL, max_concurrent=5, thinking=thinking)
+    per_count = _score_rw_pass(prompts, outputs)
+    _summarize_rw(per_count, f"Results{label_suffix}:")
 
 
 # ============================================================================
@@ -331,9 +378,17 @@ def run_niah() -> None:
 
 def main() -> None:
     stage = (sys.argv[1].lower() if len(sys.argv) > 1 else "all")
-    if stage in ("rw", "all"):
+    if stage == "rw":
         run_repeated_words()
-    if stage in ("niah", "all"):
+    elif stage == "rw-thinking":
+        run_repeated_words(with_thinking=True)
+    elif stage == "rw-compare":
+        # Run BOTH baseline and extended-thinking, side-by-side delta table.
+        run_repeated_words(compare_thinking=True)
+    elif stage == "niah":
+        run_niah()
+    elif stage == "all":
+        run_repeated_words()
         run_niah()
 
 

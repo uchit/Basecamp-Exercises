@@ -74,6 +74,11 @@ class BenchmarkSuite:
         self.results.clear()
 
     def summary(self, group_by: str = "test_name") -> str:
+        """Per-group table with mean, P50, P95 for TTFT and TTC.
+
+        Mean-only stats hide tail latency; for production decisions P95 is
+        usually the metric that matters. This table reports both.
+        """
         if not self.results:
             return "(no results)"
         groups: dict[str, list[BenchmarkResult]] = {}
@@ -81,15 +86,38 @@ class BenchmarkSuite:
             groups.setdefault(getattr(r, group_by), []).append(r)
         rows = []
         for name, group in groups.items():
+            ttfts = sorted(r.ttft * 1000 for r in group)
+            ttcs = sorted(r.total_time * 1000 for r in group)
             rows.append([
                 name,
                 len(group),
-                f"{statistics.mean(r.ttft * 1000 for r in group):.0f}",
-                f"{statistics.mean(r.total_time * 1000 for r in group):.0f}",
+                f"{statistics.mean(ttfts):.0f}",
+                f"{percentile(ttfts, 50):.0f}",
+                f"{percentile(ttfts, 95):.0f}",
+                f"{statistics.mean(ttcs):.0f}",
+                f"{percentile(ttcs, 50):.0f}",
+                f"{percentile(ttcs, 95):.0f}",
                 f"{statistics.mean(r.otps for r in group):.1f}",
                 f"${sum(r.cost for r in group) * 1000:.4f}",
             ])
-        return tabulate(rows, headers=["Test", "Runs", "TTFT(ms)", "TTC(ms)", "OTPS", "$/1K calls"], tablefmt="github")
+        return tabulate(
+            rows,
+            headers=["Test", "Runs", "TTFT mean", "TTFT p50", "TTFT p95",
+                     "TTC mean", "TTC p50", "TTC p95", "OTPS", "$/1K"],
+            tablefmt="github",
+        )
+
+
+def percentile(sorted_data, p: float) -> float:
+    """Linear-interp percentile from a pre-sorted list (no numpy)."""
+    if not sorted_data:
+        return 0.0
+    n = len(sorted_data)
+    idx = (n - 1) * p / 100
+    low = int(idx)
+    high = min(low + 1, n - 1)
+    frac = idx - low
+    return sorted_data[low] + frac * (sorted_data[high] - sorted_data[low])
 
 
 # ----------------------------------------------------------------------------
