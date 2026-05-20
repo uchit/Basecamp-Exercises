@@ -1,0 +1,24 @@
+# Pro hackathon agent — local orchestration.
+# Usage:
+#   ANTHROPIC_API_KEY=sk-ant-... docker compose up --build
+#
+# Mounts ./runs, ./cache, ./audit as volumes so artifacts persist across
+# container restarts.
+
+services:
+  pro:
+    build: .
+    image: pro-hackathon:latest
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY must be set in env}
+      PRO_PROVIDER: ${PRO_PROVIDER:-anthropic}
+      PRO_RUNS_DIR: /app/runs
+      PRO_CACHE_DIR: /app/cache
+      PRO_AUDIT_DB: /app/audit/audit.db
+    volumes:
+      - ./runs:/app/runs
+      - ./cache:/app/cache
+      - ./audit:/app/audit
+    # Override the default CMD by passing args, e.g.:
+    #   docker compose run --rm pro python pro_run.py compare sample
+    command: ["-m", "pytest", "pro/tests/", "-q"]
