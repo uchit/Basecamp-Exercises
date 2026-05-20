@@ -1,0 +1,105 @@
+{
+  "comment": "v2 — adds escalate_to_human and renames fetch_customer_v2_databricks to get_customer_metrics with USE-WHEN trigger.",
+  "tools": [
+    {
+      "name": "get_ticket",
+      "description": "Pull the full ticket record. Call this first.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "ticket_id": {"type": "string"} },
+        "required": ["ticket_id"]
+      }
+    },
+    {
+      "name": "lookup_customer_by_email",
+      "description": "Resolve submitter email to customer_id and basic info.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "email": {"type": "string"} },
+        "required": ["email"]
+      }
+    },
+    {
+      "name": "read_error_logs",
+      "description": "Read recent errors for a customer. Filterable by endpoint and status_code. since_hours defaults to 24.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "endpoint": {"type": "string"},
+          "status_code": {"type": "integer"},
+          "since_hours": {"type": "integer"}
+        },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "check_webhook_deliveries",
+      "description": "Webhook delivery log + retry status. USE WHEN ticket mentions webhooks not arriving or stopping.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "status": {"type": "string", "enum": ["delivered", "retrying", "dropped", "all"]},
+          "since_hours": {"type": "integer"}
+        },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "test_api_key",
+      "description": "Validate a key is active and check its scopes. USE WHEN ticket reports 401s or auth-related failures.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "key_prefix": {"type": "string"} },
+        "required": ["key_prefix"]
+      }
+    },
+    {
+      "name": "inspect_integration_config",
+      "description": "Integration config inferred from recent traffic headers: SDK version, configured endpoints, retry settings.",
+      "input_schema": {
+        "type": "object",
+        "properties": { "customer_id": {"type": "string"} },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "get_rate_limit_status",
+      "description": "Current usage vs limit, per endpoint, last hour.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "endpoint": {"type": "string"}
+        },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "get_customer_metrics",
+      "description": "USE WHEN the ticket mentions rate limiting, usage anomalies, intermittent errors, slow performance, retry storms, unexplained 429s/500s. Returns per-endpoint volume + error rate + retry counts from the metrics warehouse. DO NOT answer rate-limit questions from plan config alone — call this first.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "customer_id": {"type": "string"},
+          "lookback_days": {"type": "integer", "default": 7, "minimum": 1, "maximum": 30}
+        },
+        "required": ["customer_id"]
+      }
+    },
+    {
+      "name": "escalate_to_human",
+      "description": "USE WHEN the issue requires a code change on our side, OR root cause is in our infrastructure (not the customer's), OR you cannot reproduce and the customer is blocked.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "ticket_id": {"type": "string"},
+          "reason": {"type": "string", "enum": ["needs_code_change", "security", "customer_escalation", "agent_stuck"]},
+          "summary_for_human": {"type": "string"}
+        },
+        "required": ["ticket_id", "reason", "summary_for_human"]
+      }
+    }
+  ]
+}
