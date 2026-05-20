@@ -129,3 +129,44 @@ class TestRestockingOrdersList:
         assert response.status_code == 200
         for order in response.json():
             assert order["source"] == "restocking"
+
+
+class TestRestockOrderIdempotency:
+    """Idempotency-Key contract: repeat POSTs with the same key return the
+    original order; different keys (or no key) produce fresh orders. Protects
+    against double-click submits and any future retry-with-backoff layer."""
+
+    def test_same_idempotency_key_returns_same_order(self, client):
+        body = {"items": [{"sku": "PCB-001", "quantity": 2}],
+                "idempotency_key": "test-key-same-001"}
+        first = client.post("/api/orders/restock", json=body).json()
+        second = client.post("/api/orders/restock", json=body).json()
+        assert first["id"] == second["id"]
+        assert first["order_number"] == second["order_number"]
+        assert first["total_value"] == second["total_value"]
+
+    def test_different_idempotency_keys_create_distinct_orders(self, client):
+        body_a = {"items": [{"sku": "PCB-001", "quantity": 1}],
+                  "idempotency_key": "test-key-distinct-A"}
+        body_b = {"items": [{"sku": "PCB-001", "quantity": 1}],
+                  "idempotency_key": "test-key-distinct-B"}
+        a = client.post("/api/orders/restock", json=body_a).json()
+        b = client.post("/api/orders/restock", json=body_b).json()
+        assert a["id"] != b["id"]
+
+    def test_no_idempotency_key_creates_new_each_time(self, client):
+        body = {"items": [{"sku": "PSU-501", "quantity": 1}]}
+        a = client.post("/api/orders/restock", json=body).json()
+        b = client.post("/api/orders/restock", json=body).json()
+        # No key means each POST creates a fresh order.
+        assert a["id"] != b["id"]
+
+    def test_idempotent_replay_does_not_duplicate_in_listing(self, client):
+        body = {"items": [{"sku": "PSU-501", "quantity": 1}],
+                "idempotency_key": "test-key-no-dup-001"}
+        client.post("/api/orders/restock", json=body)
+        before = len(client.get("/api/restocking/orders").json())
+        client.post("/api/orders/restock", json=body)  # replay
+        client.post("/api/orders/restock", json=body)  # replay
+        after = len(client.get("/api/restocking/orders").json())
+        assert after == before

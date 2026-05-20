@@ -145,6 +145,14 @@ class RestockOrderItem(BaseModel):
 class RestockOrderRequest(BaseModel):
     items: List[RestockOrderItem]
     budget: Optional[float] = None
+    idempotency_key: Optional[str] = None
+
+# Module-level idempotency cache: idempotency_key -> created order id.
+# In-memory (resets on server restart, by design for this demo). For
+# production: Redis with TTL, or a DB unique constraint on the column.
+# Memory bound: capped at 10K entries; oldest evicted on overflow.
+_IDEMPOTENCY_CACHE: dict[str, str] = {}
+_IDEMPOTENCY_CAP = 10_000
 
 # API endpoints
 @app.get("/")
@@ -397,7 +405,21 @@ def get_restocking_orders():
 
 @app.post("/api/orders/restock", response_model=Order)
 def submit_restock_order(req: RestockOrderRequest):
-    """Place a restocking order. New orders persist in-memory and reset on server restart."""
+    """Place a restocking order. New orders persist in-memory and reset on server restart.
+
+    Supports an optional idempotency_key. If provided and previously seen, the
+    original order is returned unchanged. This makes double-click submits + any
+    retry layer safe by construction.
+    """
+    if req.idempotency_key:
+        prior_id = _IDEMPOTENCY_CACHE.get(req.idempotency_key)
+        if prior_id:
+            prior = next((o for o in orders if o.get("id") == prior_id), None)
+            if prior:
+                return prior
+            # Cache pointed to a missing order (e.g. server restart cleared
+            # `orders` but cache held in same process). Fall through and create.
+
     if not req.items:
         raise HTTPException(status_code=400, detail="No items provided")
     sku_to_item = {item["sku"]: item for item in inventory_items}
@@ -438,6 +460,12 @@ def submit_restock_order(req: RestockOrderRequest):
         "source": "restocking",
     }
     orders.append(new_order)
+    if req.idempotency_key:
+        # Evict oldest if over cap (FIFO using dict insertion order).
+        if len(_IDEMPOTENCY_CACHE) >= _IDEMPOTENCY_CAP:
+            oldest = next(iter(_IDEMPOTENCY_CACHE))
+            _IDEMPOTENCY_CACHE.pop(oldest, None)
+        _IDEMPOTENCY_CACHE[req.idempotency_key] = new_order["id"]
     return new_order
 
 if __name__ == "__main__":

@@ -81,9 +81,19 @@ def main() -> int:
         # ────────────────────────────────────────────────────────────────
         # 2. Click through every nav route
         # ────────────────────────────────────────────────────────────────
-        print("\n[2] Click through every nav route")
+        print("\n[2] Click through every nav route (with ARIA assertion)")
         for path, slug in NAV_ROUTES:
             link = page.locator(f'a[href="{path}"]').first
+            # ARIA contract: every nav link must carry an aria-label so screen
+            # readers retain access even when the visible label is hidden
+            # (collapsed sidebar). Inline icons must be aria-hidden.
+            aria_label = link.get_attribute("aria-label")
+            if not aria_label or not aria_label.strip():
+                findings.append(f"{path}: missing aria-label on nav link")
+            icon = link.locator(".nav-icon").first
+            icon_hidden = icon.get_attribute("aria-hidden") if icon.count() else None
+            if icon_hidden != "true":
+                findings.append(f"{path}: .nav-icon missing aria-hidden=true")
             link.click()
             page.wait_for_url(f"{BASE}{path}", timeout=5000)
             page.wait_for_load_state("networkidle", timeout=10000)
